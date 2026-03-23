@@ -68,7 +68,7 @@ internal static class DokployManifestPublishing
             writer.WriteStartObject();
             writer.WriteString("name", endpoint.Endpoint?.Name);
             writer.WriteString("scheme", endpoint.Endpoint?.UriScheme ?? "http");
-            writer.WriteNumber("targetPort", endpoint.TargetPort.Value ?? endpoint.ExposedPort.Value ?? 0);
+            writer.WriteNumber("targetPort", endpoint.TargetPort.Value ?? endpoint.ExposedPort.Value ?? 8080);
             writer.WriteEndObject();
         }
         writer.WriteEndArray();
