@@ -138,13 +138,14 @@ internal sealed class DokployApplicationService
             throw new InvalidOperationException($"Compute resource '{rsc.Name}' does not have Docker image information in annotations or properties.");
         }
 
+        var isDockerHub = IsDockerHubRegistry(registryUrl);
         var saveDockerProviderBody = JsonSerializer.Serialize(new
         {
             applicationId = application.Id,
             registryUrl,
             dockerImage,
-            username = _client.RegistrySettings.Username,
-            password = _client.RegistrySettings.Password
+            username = isDockerHub ? null : _client.RegistrySettings.Username,
+            password = isDockerHub ? null : _client.RegistrySettings.Password
         }, DokployApiClient.JsonOptions);
 
         using var saveDockerProviderResponse = await _client.Http.PostAsync("api/application.saveDockerProvider", DokployApiClient.CreateJsonContent(saveDockerProviderBody));
@@ -704,6 +705,13 @@ internal sealed class DokployApplicationService
             .ThenBy(e => e.Port)
             .DistinctBy(e => $"{e.Name}|{e.Scheme}|{e.Port}")
             .ToList();
+    }
+
+    private static bool IsDockerHubRegistry(string? registryUrl)
+    {
+        return string.Equals(registryUrl, "docker.io", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(registryUrl, "index.docker.io", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(registryUrl, "registry-1.docker.io", StringComparison.OrdinalIgnoreCase);
     }
 
     private sealed record ExternalEndpointConfig(string Name, string Scheme, int Port);
