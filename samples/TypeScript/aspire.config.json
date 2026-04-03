@@ -1,0 +1,16 @@
+{
+  "appHost": {
+    "path": "DokployDeploy.TsAppHost/apphost.ts",
+    "language": "typescript/nodejs"
+  },
+  "sdk": {
+    "version": "13.3.0-preview.1.26180.8"
+  },
+  "channel": "daily",
+  "packages": {
+    "Ridder.Hosting.Dokploy": "../../../src/Ridder.Hosting.Dokploy/Ridder.Hosting.Dokploy.csproj",
+    "Aspire.Hosting.Redis": "13.3.0-preview.1.26180.8",
+    "Aspire.Hosting.JavaScript": "13.3.0-preview.1.26180.8",
+    "Aspire.Hosting.Docker": "13.3.0-preview.1.26180.8"
+  }
+}

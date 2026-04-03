@@ -1,8 +1,11 @@
+using Aspire.Hosting;
+
 namespace Ridder.Hosting.Dokploy;
 
 /// <summary>
 /// Configures how an Aspire compute resource should be published to Dokploy.
 /// </summary>
+[AspireDto]
 public sealed class DokployApplicationOptions
 {
     /// <summary>

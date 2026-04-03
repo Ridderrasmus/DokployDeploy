@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Pipelines;
 using Aspire.Hosting.Publishing;
@@ -13,6 +14,7 @@ namespace Ridder.Hosting.Dokploy;
 /// <remarks>
 /// This resource also acts as an <see cref="IContainerRegistry"/> so compute resources can target the registry prepared for the Dokploy environment.
 /// </remarks>
+[AspireExport(ExposeProperties = true)]
 public class DokployProjectEnvironmentResource : Resource, IContainerRegistry
 {
     private readonly string _name;

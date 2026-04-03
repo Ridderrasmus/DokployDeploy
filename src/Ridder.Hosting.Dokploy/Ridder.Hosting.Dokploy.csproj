@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);ASPIREATS001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +15,6 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting" Version="13.3.0-preview.1.26177.4" />
     <PackageReference Include="Aspire.Hosting.Docker" Version="13.3.0-preview.1.26177.4" />
-
   </ItemGroup>
 
 </Project>

@@ -5,7 +5,7 @@ namespace Ridder.Hosting.Dokploy.Annotations;
 /// <summary>
 /// Stores Dokploy publishing intent and application-specific options for a compute resource.
 /// </summary>
-public sealed class DokployPublishApplicationAnnotation : IDokployPublishAnnotation
+internal sealed class DokployPublishApplicationAnnotation : IDokployPublishAnnotation
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="DokployPublishApplicationAnnotation"/> class.

@@ -5,7 +5,7 @@ namespace Ridder.Hosting.Dokploy.Abstractions;
 /// <summary>
 /// Represents a Dokploy publishing annotation attached to an Aspire resource.
 /// </summary>
-public interface IDokployPublishAnnotation : IResourceAnnotation
+internal interface IDokployPublishAnnotation : IResourceAnnotation
 {
     /// <summary>
     /// Gets the Dokploy environment that will provision the annotated resource.
