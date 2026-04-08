@@ -28,18 +28,6 @@ import {
 // Handle Type Aliases (Internal - not exported to users)
 // ============================================================================
 
-/** Handle to DockerComposeAspireDashboardResource */
-type DockerComposeAspireDashboardResourceHandle = Handle<'Aspire.Hosting.Docker/Aspire.Hosting.Docker.DockerComposeAspireDashboardResource'>;
-
-/** Handle to DockerComposeEnvironmentResource */
-type DockerComposeEnvironmentResourceHandle = Handle<'Aspire.Hosting.Docker/Aspire.Hosting.Docker.DockerComposeEnvironmentResource'>;
-
-/** Handle to DockerComposeServiceResource */
-type DockerComposeServiceResourceHandle = Handle<'Aspire.Hosting.Docker/Aspire.Hosting.Docker.DockerComposeServiceResource'>;
-
-/** Handle to Service */
-type ServiceHandle = Handle<'Aspire.Hosting.Docker/Aspire.Hosting.Docker.Resources.ComposeNodes.Service'>;
-
 /** Handle to JavaScriptAppResource */
 type JavaScriptAppResourceHandle = Handle<'Aspire.Hosting.JavaScript/Aspire.Hosting.JavaScript.JavaScriptAppResource'>;
 
@@ -259,12 +247,6 @@ export enum CertificateTrustScope {
     System = "System",
 }
 
-/** Enum type for CommandResultFormat */
-export enum CommandResultFormat {
-    Text = "Text",
-    Json = "Json",
-}
-
 /** Enum type for ContainerLifetime */
 export enum ContainerLifetime {
     Session = "Session",
@@ -362,6 +344,12 @@ export enum WaitBehavior {
 // DTO Interfaces
 // ============================================================================
 
+/** DTO interface for AddContainerOptions */
+export interface AddContainerOptions {
+    image?: string;
+    tag?: string;
+}
+
 /** DTO interface for CommandOptions */
 export interface CommandOptions {
     description?: string;
@@ -398,8 +386,27 @@ export interface ExecuteCommandResult {
     success?: boolean;
     canceled?: boolean;
     errorMessage?: string;
-    result?: string;
-    resultFormat?: CommandResultFormat;
+}
+
+/** DTO interface for GenerateParameterDefault */
+export interface GenerateParameterDefault {
+    minLength?: number;
+    lower?: boolean;
+    upper?: boolean;
+    numeric?: boolean;
+    special?: boolean;
+    minLower?: number;
+    minUpper?: number;
+    minNumeric?: number;
+    minSpecial?: number;
+}
+
+/** DTO interface for ReferenceEnvironmentInjectionOptions */
+export interface ReferenceEnvironmentInjectionOptions {
+    connectionString?: boolean;
+    connectionProperties?: boolean;
+    serviceDiscovery?: boolean;
+    endpoints?: boolean;
 }
 
 /** DTO interface for ResourceEventDto */
@@ -451,6 +458,11 @@ export interface AddParameterFromConfigurationOptions {
 
 export interface AddParameterOptions {
     secret?: boolean;
+}
+
+export interface AddParameterWithGeneratedValueOptions {
+    secret?: boolean;
+    persist?: boolean;
 }
 
 export interface AddParameterWithValueOptions {
@@ -566,8 +578,10 @@ export interface WithCommandOptions {
     commandOptions?: CommandOptions;
 }
 
-export interface WithDashboardOptions {
-    enabled?: boolean;
+export interface WithContainerCertificatePathsOptions {
+    customCertificatesDestination?: string;
+    defaultCertificateBundlePaths?: string[];
+    defaultCertificateDirectoryPaths?: string[];
 }
 
 export interface WithDataBindMountOptions {
@@ -607,10 +621,6 @@ export interface WithEndpointOptions {
 export interface WithExternalServiceHttpHealthCheckOptions {
     path?: string;
     statusCode?: number;
-}
-
-export interface WithForwardedHeadersOptions {
-    enabled?: boolean;
 }
 
 export interface WithHostPortOptions {
@@ -1521,17 +1531,6 @@ export class ExecuteCommandContext {
                 { context: this._handle, value: CancellationToken.fromValue(value) }
             );
         }
-    };
-
-    /** Gets the Logger property */
-    logger = {
-        get: async (): Promise<Logger> => {
-            const handle = await this._client.invokeCapability<ILoggerHandle>(
-                'Aspire.Hosting.ApplicationModel/ExecuteCommandContext.logger',
-                { context: this._handle }
-            );
-            return new Logger(handle, this._client);
-        },
     };
 
 }
@@ -2714,651 +2713,6 @@ export class ResourceUrlsCallbackContext {
 }
 
 // ============================================================================
-// Service
-// ============================================================================
-
-/**
- * Type class for Service.
- */
-export class Service {
-    constructor(private _handle: ServiceHandle, private _client: AspireClientRpc) {}
-
-    /** Serialize for JSON-RPC transport */
-    toJSON(): MarshalledHandle { return this._handle.toJSON(); }
-
-    /** Gets the Image property */
-    image = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.image',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setImage',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the PullPolicy property */
-    pullPolicy = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.pullPolicy',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setPullPolicy',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the ContainerName property */
-    containerName = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.containerName',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setContainerName',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Command property */
-    private _command?: AspireList<string>;
-    get command(): AspireList<string> {
-        if (!this._command) {
-            this._command = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.command',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.command'
-            );
-        }
-        return this._command;
-    }
-
-    /** Gets the Entrypoint property */
-    private _entrypoint?: AspireList<string>;
-    get entrypoint(): AspireList<string> {
-        if (!this._entrypoint) {
-            this._entrypoint = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.entrypoint',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.entrypoint'
-            );
-        }
-        return this._entrypoint;
-    }
-
-    /** Gets the Environment property */
-    private _environment?: AspireDict<string, string>;
-    get environment(): AspireDict<string, string> {
-        if (!this._environment) {
-            this._environment = new AspireDict<string, string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.environment',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.environment'
-            );
-        }
-        return this._environment;
-    }
-
-    /** Gets the EnvFile property */
-    private _envFile?: AspireList<string>;
-    get envFile(): AspireList<string> {
-        if (!this._envFile) {
-            this._envFile = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.envFile',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.envFile'
-            );
-        }
-        return this._envFile;
-    }
-
-    /** Gets the WorkingDir property */
-    workingDir = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.workingDir',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setWorkingDir',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Ports property */
-    private _ports?: AspireList<string>;
-    get ports(): AspireList<string> {
-        if (!this._ports) {
-            this._ports = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.ports',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.ports'
-            );
-        }
-        return this._ports;
-    }
-
-    /** Gets the Expose property */
-    private _expose?: AspireList<string>;
-    get expose(): AspireList<string> {
-        if (!this._expose) {
-            this._expose = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.expose',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.expose'
-            );
-        }
-        return this._expose;
-    }
-
-    /** Gets the User property */
-    user = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.user',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setUser',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Networks property */
-    private _networks?: AspireList<string>;
-    get networks(): AspireList<string> {
-        if (!this._networks) {
-            this._networks = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.networks',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.networks'
-            );
-        }
-        return this._networks;
-    }
-
-    /** Gets the Restart property */
-    restart = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.restart',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setRestart',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Labels property */
-    private _labels?: AspireDict<string, string>;
-    get labels(): AspireDict<string, string> {
-        if (!this._labels) {
-            this._labels = new AspireDict<string, string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.labels',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.labels'
-            );
-        }
-        return this._labels;
-    }
-
-    /** Gets the DomainName property */
-    domainName = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.domainName',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setDomainName',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Hostname property */
-    hostname = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.hostname',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setHostname',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Isolation property */
-    isolation = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.isolation',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setIsolation',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Ipc property */
-    ipc = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.ipc',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setIpc',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the MacAddress property */
-    macAddress = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.macAddress',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setMacAddress',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Pid property */
-    pid = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.pid',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setPid',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the CapAdd property */
-    private _capAdd?: AspireList<string>;
-    get capAdd(): AspireList<string> {
-        if (!this._capAdd) {
-            this._capAdd = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.capAdd',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.capAdd'
-            );
-        }
-        return this._capAdd;
-    }
-
-    /** Gets the CapDrop property */
-    private _capDrop?: AspireList<string>;
-    get capDrop(): AspireList<string> {
-        if (!this._capDrop) {
-            this._capDrop = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.capDrop',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.capDrop'
-            );
-        }
-        return this._capDrop;
-    }
-
-    /** Gets the CgroupParent property */
-    cgroupParent = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.cgroupParent',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setCgroupParent',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Devices property */
-    private _devices?: AspireList<string>;
-    get devices(): AspireList<string> {
-        if (!this._devices) {
-            this._devices = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.devices',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.devices'
-            );
-        }
-        return this._devices;
-    }
-
-    /** Gets the Dns property */
-    private _dns?: AspireList<string>;
-    get dns(): AspireList<string> {
-        if (!this._dns) {
-            this._dns = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.dns',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.dns'
-            );
-        }
-        return this._dns;
-    }
-
-    /** Gets the DnsSearch property */
-    private _dnsSearch?: AspireList<string>;
-    get dnsSearch(): AspireList<string> {
-        if (!this._dnsSearch) {
-            this._dnsSearch = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.dnsSearch',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.dnsSearch'
-            );
-        }
-        return this._dnsSearch;
-    }
-
-    /** Gets the ExtraHosts property */
-    private _extraHosts?: AspireDict<string, string>;
-    get extraHosts(): AspireDict<string, string> {
-        if (!this._extraHosts) {
-            this._extraHosts = new AspireDict<string, string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.extraHosts',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.extraHosts'
-            );
-        }
-        return this._extraHosts;
-    }
-
-    /** Gets the GroupAdd property */
-    private _groupAdd?: AspireList<string>;
-    get groupAdd(): AspireList<string> {
-        if (!this._groupAdd) {
-            this._groupAdd = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.groupAdd',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.groupAdd'
-            );
-        }
-        return this._groupAdd;
-    }
-
-    /** Gets the Init property */
-    init = {
-        get: async (): Promise<boolean> => {
-            return await this._client.invokeCapability<boolean>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.init',
-                { context: this._handle }
-            );
-        },
-        set: async (value: boolean): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setInit',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Links property */
-    private _links?: AspireList<string>;
-    get links(): AspireList<string> {
-        if (!this._links) {
-            this._links = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.links',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.links'
-            );
-        }
-        return this._links;
-    }
-
-    /** Gets the ExternalLinks property */
-    private _externalLinks?: AspireList<string>;
-    get externalLinks(): AspireList<string> {
-        if (!this._externalLinks) {
-            this._externalLinks = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.externalLinks',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.externalLinks'
-            );
-        }
-        return this._externalLinks;
-    }
-
-    /** Gets the NetworkMode property */
-    networkMode = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.networkMode',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setNetworkMode',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Profiles property */
-    private _profiles?: AspireList<string>;
-    get profiles(): AspireList<string> {
-        if (!this._profiles) {
-            this._profiles = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.profiles',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.profiles'
-            );
-        }
-        return this._profiles;
-    }
-
-    /** Gets the ReadOnly property */
-    readOnly = {
-        get: async (): Promise<boolean> => {
-            return await this._client.invokeCapability<boolean>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.readOnly',
-                { context: this._handle }
-            );
-        },
-        set: async (value: boolean): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setReadOnly',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the SecurityOpt property */
-    private _securityOpt?: AspireList<string>;
-    get securityOpt(): AspireList<string> {
-        if (!this._securityOpt) {
-            this._securityOpt = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.securityOpt',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.securityOpt'
-            );
-        }
-        return this._securityOpt;
-    }
-
-    /** Gets the StopGracePeriod property */
-    stopGracePeriod = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.stopGracePeriod',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setStopGracePeriod',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the StopSignal property */
-    stopSignal = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.stopSignal',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setStopSignal',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Sysctls property */
-    private _sysctls?: AspireDict<string, string>;
-    get sysctls(): AspireDict<string, string> {
-        if (!this._sysctls) {
-            this._sysctls = new AspireDict<string, string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.sysctls',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.sysctls'
-            );
-        }
-        return this._sysctls;
-    }
-
-    /** Gets the Tmpfs property */
-    private _tmpfs?: AspireList<string>;
-    get tmpfs(): AspireList<string> {
-        if (!this._tmpfs) {
-            this._tmpfs = new AspireList<string>(
-                this._handle,
-                this._client,
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.tmpfs',
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.tmpfs'
-            );
-        }
-        return this._tmpfs;
-    }
-
-    /** Gets the StdinOpen property */
-    stdinOpen = {
-        get: async (): Promise<boolean> => {
-            return await this._client.invokeCapability<boolean>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.stdinOpen',
-                { context: this._handle }
-            );
-        },
-        set: async (value: boolean): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setStdinOpen',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Tty property */
-    tty = {
-        get: async (): Promise<boolean> => {
-            return await this._client.invokeCapability<boolean>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.tty',
-                { context: this._handle }
-            );
-        },
-        set: async (value: boolean): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setTty',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Name property */
-    name = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.name',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker.Resources.ComposeNodes/Service.setName',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-}
-
-// ============================================================================
 // UpdateCommandStateContext
 // ============================================================================
 
@@ -3637,7 +2991,7 @@ export class DistributedApplicationBuilder {
 
     /** Adds a container resource */
     /** @internal */
-    async _addContainerInternal(name: string, image: string): Promise<ContainerResource> {
+    async _addContainerInternal(name: string, image: string | AddContainerOptions): Promise<ContainerResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, image };
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
             'Aspire.Hosting/addContainer',
@@ -3646,7 +3000,7 @@ export class DistributedApplicationBuilder {
         return new ContainerResource(result, this._client);
     }
 
-    addContainer(name: string, image: string): ContainerResourcePromise {
+    addContainer(name: string, image: string | AddContainerOptions): ContainerResourcePromise {
         return new ContainerResourcePromise(this._addContainerInternal(name, image));
     }
 
@@ -3797,6 +3151,25 @@ export class DistributedApplicationBuilder {
         return new ParameterResourcePromise(this._addParameterFromConfigurationInternal(name, configurationKey, secret));
     }
 
+    /** Adds a parameter with a generated default value */
+    /** @internal */
+    async _addParameterWithGeneratedValueInternal(name: string, value: GenerateParameterDefault, secret?: boolean, persist?: boolean): Promise<ParameterResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        if (secret !== undefined) rpcArgs.secret = secret;
+        if (persist !== undefined) rpcArgs.persist = persist;
+        const result = await this._client.invokeCapability<ParameterResourceHandle>(
+            'Aspire.Hosting/addParameterWithGeneratedValue',
+            rpcArgs
+        );
+        return new ParameterResource(result, this._client);
+    }
+
+    addParameterWithGeneratedValue(name: string, value: GenerateParameterDefault, options?: AddParameterWithGeneratedValueOptions): ParameterResourcePromise {
+        const secret = options?.secret;
+        const persist = options?.persist;
+        return new ParameterResourcePromise(this._addParameterWithGeneratedValueInternal(name, value, secret, persist));
+    }
+
     /** Adds a connection string resource */
     /** @internal */
     async _addConnectionStringInternal(name: string, environmentVariableName?: string): Promise<ResourceWithConnectionString> {
@@ -3812,6 +3185,21 @@ export class DistributedApplicationBuilder {
     addConnectionString(name: string, options?: AddConnectionStringOptions): ResourceWithConnectionStringPromise {
         const environmentVariableName = options?.environmentVariableName;
         return new ResourceWithConnectionStringPromise(this._addConnectionStringInternal(name, environmentVariableName));
+    }
+
+    /** Adds a .NET project resource without a launch profile */
+    /** @internal */
+    async _addProjectWithoutLaunchProfileInternal(name: string, projectPath: string): Promise<ProjectResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, projectPath };
+        const result = await this._client.invokeCapability<ProjectResourceHandle>(
+            'Aspire.Hosting/addProjectWithoutLaunchProfile',
+            rpcArgs
+        );
+        return new ProjectResource(result, this._client);
+    }
+
+    addProjectWithoutLaunchProfile(name: string, projectPath: string): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._addProjectWithoutLaunchProfileInternal(name, projectPath));
     }
 
     /** Adds a .NET project resource */
@@ -4012,22 +3400,6 @@ export class DistributedApplicationBuilder {
         return new ViteAppResourcePromise(this._addViteAppInternal(name, appDirectory, runScriptName));
     }
 
-    /** Adds a Docker Compose publishing environment */
-    /** @internal */
-    async _addDockerComposeEnvironmentInternal(name: string): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting.Docker/addDockerComposeEnvironment',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    addDockerComposeEnvironment(name: string): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._addDockerComposeEnvironmentInternal(name));
-    }
-
-    /** Adds a Dokploy environment resource */
     /** @internal */
     async _addDokployEnvironmentInternal(name: string): Promise<DokployProjectEnvironmentResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name };
@@ -4083,7 +3455,7 @@ export class DistributedApplicationBuilderPromise implements PromiseLike<Distrib
     }
 
     /** Adds a container resource */
-    addContainer(name: string, image: string): ContainerResourcePromise {
+    addContainer(name: string, image: string | AddContainerOptions): ContainerResourcePromise {
         return new ContainerResourcePromise(this._promise.then(obj => obj.addContainer(name, image)));
     }
 
@@ -4132,9 +3504,19 @@ export class DistributedApplicationBuilderPromise implements PromiseLike<Distrib
         return new ParameterResourcePromise(this._promise.then(obj => obj.addParameterFromConfiguration(name, configurationKey, options)));
     }
 
+    /** Adds a parameter with a generated default value */
+    addParameterWithGeneratedValue(name: string, value: GenerateParameterDefault, options?: AddParameterWithGeneratedValueOptions): ParameterResourcePromise {
+        return new ParameterResourcePromise(this._promise.then(obj => obj.addParameterWithGeneratedValue(name, value, options)));
+    }
+
     /** Adds a connection string resource */
     addConnectionString(name: string, options?: AddConnectionStringOptions): ResourceWithConnectionStringPromise {
         return new ResourceWithConnectionStringPromise(this._promise.then(obj => obj.addConnectionString(name, options)));
+    }
+
+    /** Adds a .NET project resource without a launch profile */
+    addProjectWithoutLaunchProfile(name: string, projectPath: string): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._promise.then(obj => obj.addProjectWithoutLaunchProfile(name, projectPath)));
     }
 
     /** Adds a .NET project resource */
@@ -4197,12 +3579,6 @@ export class DistributedApplicationBuilderPromise implements PromiseLike<Distrib
         return new ViteAppResourcePromise(this._promise.then(obj => obj.addViteApp(name, appDirectory, options)));
     }
 
-    /** Adds a Docker Compose publishing environment */
-    addDockerComposeEnvironment(name: string): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.addDockerComposeEnvironment(name)));
-    }
-
-    /** Adds a Dokploy environment resource */
     addDokployEnvironment(name: string): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.addDokployEnvironment(name)));
     }
@@ -5128,7 +4504,7 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
     }
 
     /** @internal */
-    private async _withConnectionPropertyInternal(name: string, value: ReferenceExpression): Promise<ConnectionStringResource> {
+    private async _withConnectionPropertyInternal(name: string, value: string | ReferenceExpression): Promise<ConnectionStringResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<ConnectionStringResourceHandle>(
             'Aspire.Hosting/withConnectionProperty',
@@ -5137,8 +4513,8 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
         return new ConnectionStringResource(result, this._client);
     }
 
-    /** Adds a connection property with a reference expression */
-    withConnectionProperty(name: string, value: ReferenceExpression): ConnectionStringResourcePromise {
+    /** Adds a connection property with a string or reference expression value */
+    withConnectionProperty(name: string, value: string | ReferenceExpression): ConnectionStringResourcePromise {
         return new ConnectionStringResourcePromise(this._withConnectionPropertyInternal(name, value));
     }
 
@@ -5155,6 +4531,15 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
     /** Adds a connection property with a string value */
     withConnectionPropertyValue(name: string, value: string): ConnectionStringResourcePromise {
         return new ConnectionStringResourcePromise(this._withConnectionPropertyValueInternal(name, value));
+    }
+
+    /** Gets a connection property by key */
+    async getConnectionProperty(key: string): Promise<ReferenceExpression> {
+        const rpcArgs: Record<string, unknown> = { resource: this._handle, key };
+        return await this._client.invokeCapability<ReferenceExpression>(
+            'Aspire.Hosting/getConnectionProperty',
+            rpcArgs
+        );
     }
 
     /** @internal */
@@ -5175,6 +4560,26 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): ConnectionStringResourcePromise {
         return new ConnectionStringResourcePromise(this._withUrlsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<ConnectionStringResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ConnectionStringResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new ConnectionStringResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ConnectionStringResourcePromise {
+        return new ConnectionStringResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
     }
 
     /** @internal */
@@ -5249,7 +4654,7 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<ConnectionStringResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<ConnectionStringResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new ConnectionStringResource(result, this._client);
@@ -5279,7 +4684,7 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<ConnectionStringResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<ConnectionStringResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new ConnectionStringResource(result, this._client);
@@ -5325,7 +4730,7 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<ConnectionStringResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new ConnectionStringResource(result, this._client);
@@ -5375,10 +4780,25 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<ConnectionStringResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<ConnectionStringResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new ConnectionStringResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ConnectionStringResourcePromise {
+        return new ConnectionStringResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<ConnectionStringResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<ConnectionStringResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new ConnectionStringResource(result, this._client);
@@ -5393,7 +4813,7 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<ConnectionStringResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<ConnectionStringResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new ConnectionStringResource(result, this._client);
@@ -5462,6 +4882,26 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
         const tags = options?.tags;
         const description = options?.description;
         return new ConnectionStringResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<ConnectionStringResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ConnectionStringResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new ConnectionStringResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ConnectionStringResourcePromise {
+        return new ConnectionStringResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -5603,24 +5043,8 @@ export class ConnectionStringResource extends ResourceBuilderBase<ConnectionStri
         return new ConnectionStringResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ConnectionStringResourcePromise {
         return new ConnectionStringResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<ConnectionStringResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<ConnectionStringResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new ConnectionStringResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ConnectionStringResourcePromise {
-        return new ConnectionStringResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -5655,8 +5079,8 @@ export class ConnectionStringResourcePromise implements PromiseLike<ConnectionSt
         return new ConnectionStringResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Adds a connection property with a reference expression */
-    withConnectionProperty(name: string, value: ReferenceExpression): ConnectionStringResourcePromise {
+    /** Adds a connection property with a string or reference expression value */
+    withConnectionProperty(name: string, value: string | ReferenceExpression): ConnectionStringResourcePromise {
         return new ConnectionStringResourcePromise(this._promise.then(obj => obj.withConnectionProperty(name, value)));
     }
 
@@ -5665,9 +5089,19 @@ export class ConnectionStringResourcePromise implements PromiseLike<ConnectionSt
         return new ConnectionStringResourcePromise(this._promise.then(obj => obj.withConnectionPropertyValue(name, value)));
     }
 
+    /** Gets a connection property by key */
+    getConnectionProperty(key: string): Promise<ReferenceExpression> {
+        return this._promise.then(obj => obj.getConnectionProperty(key));
+    }
+
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): ConnectionStringResourcePromise {
         return new ConnectionStringResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ConnectionStringResourcePromise {
+        return new ConnectionStringResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -5730,6 +5164,11 @@ export class ConnectionStringResourcePromise implements PromiseLike<ConnectionSt
         return new ConnectionStringResourcePromise(this._promise.then(obj => obj.withCommand(name, displayName, executeCommand, options)));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ConnectionStringResourcePromise {
+        return new ConnectionStringResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): ConnectionStringResourcePromise {
         return new ConnectionStringResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -5753,6 +5192,11 @@ export class ConnectionStringResourcePromise implements PromiseLike<ConnectionSt
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): ConnectionStringResourcePromise {
         return new ConnectionStringResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ConnectionStringResourcePromise {
+        return new ConnectionStringResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -5790,14 +5234,8 @@ export class ConnectionStringResourcePromise implements PromiseLike<ConnectionSt
         return new ConnectionStringResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ConnectionStringResourcePromise {
         return new ConnectionStringResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ConnectionStringResourcePromise {
-        return new ConnectionStringResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -5880,6 +5318,26 @@ export class ContainerRegistryResource extends ResourceBuilderBase<ContainerRegi
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): ContainerRegistryResourcePromise {
         return new ContainerRegistryResourcePromise(this._withUrlsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<ContainerRegistryResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ContainerRegistryResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new ContainerRegistryResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ContainerRegistryResourcePromise {
+        return new ContainerRegistryResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
     }
 
     /** @internal */
@@ -6003,10 +5461,25 @@ export class ContainerRegistryResource extends ResourceBuilderBase<ContainerRegi
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<ContainerRegistryResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<ContainerRegistryResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new ContainerRegistryResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ContainerRegistryResourcePromise {
+        return new ContainerRegistryResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<ContainerRegistryResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<ContainerRegistryResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new ContainerRegistryResource(result, this._client);
@@ -6021,7 +5494,7 @@ export class ContainerRegistryResource extends ResourceBuilderBase<ContainerRegi
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<ContainerRegistryResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<ContainerRegistryResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new ContainerRegistryResource(result, this._client);
@@ -6090,6 +5563,26 @@ export class ContainerRegistryResource extends ResourceBuilderBase<ContainerRegi
         const tags = options?.tags;
         const description = options?.description;
         return new ContainerRegistryResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<ContainerRegistryResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ContainerRegistryResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new ContainerRegistryResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ContainerRegistryResourcePromise {
+        return new ContainerRegistryResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -6211,24 +5704,8 @@ export class ContainerRegistryResource extends ResourceBuilderBase<ContainerRegi
         return new ContainerRegistryResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ContainerRegistryResourcePromise {
         return new ContainerRegistryResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<ContainerRegistryResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<ContainerRegistryResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new ContainerRegistryResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ContainerRegistryResourcePromise {
-        return new ContainerRegistryResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -6268,6 +5745,11 @@ export class ContainerRegistryResourcePromise implements PromiseLike<ContainerRe
         return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
     }
 
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ContainerRegistryResourcePromise {
+        return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
+    }
+
     /** Adds or modifies displayed URLs */
     withUrl(url: string, options?: WithUrlOptions): ContainerRegistryResourcePromise {
         return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.withUrl(url, options)));
@@ -6303,6 +5785,11 @@ export class ContainerRegistryResourcePromise implements PromiseLike<ContainerRe
         return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.withCommand(name, displayName, executeCommand, options)));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ContainerRegistryResourcePromise {
+        return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): ContainerRegistryResourcePromise {
         return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -6326,6 +5813,11 @@ export class ContainerRegistryResourcePromise implements PromiseLike<ContainerRe
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): ContainerRegistryResourcePromise {
         return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ContainerRegistryResourcePromise {
+        return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -6358,14 +5850,8 @@ export class ContainerRegistryResourcePromise implements PromiseLike<ContainerRe
         return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ContainerRegistryResourcePromise {
         return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ContainerRegistryResourcePromise {
-        return new ContainerRegistryResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -6583,7 +6069,7 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     }
 
     /** @internal */
-    private async _withBuildArgInternal(name: string, value: ParameterResource): Promise<ContainerResource> {
+    private async _withBuildArgInternal(name: string, value: string | ParameterResource): Promise<ContainerResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
             'Aspire.Hosting/withBuildArg',
@@ -6592,8 +6078,8 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
         return new ContainerResource(result, this._client);
     }
 
-    /** Adds a build argument from a parameter resource */
-    withBuildArg(name: string, value: ParameterResource): ContainerResourcePromise {
+    /** Adds a build argument from a string value or parameter resource */
+    withBuildArg(name: string, value: string | ParameterResource): ContainerResourcePromise {
         return new ContainerResourcePromise(this._withBuildArgInternal(name, value));
     }
 
@@ -6601,7 +6087,7 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     private async _withBuildSecretInternal(name: string, value: ParameterResource): Promise<ContainerResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Aspire.Hosting/withBuildSecret',
+            'Aspire.Hosting/withParameterBuildSecret',
             rpcArgs
         );
         return new ContainerResource(result, this._client);
@@ -6610,6 +6096,27 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     /** Adds a build secret from a parameter resource */
     withBuildSecret(name: string, value: ParameterResource): ContainerResourcePromise {
         return new ContainerResourcePromise(this._withBuildSecretInternal(name, value));
+    }
+
+    /** @internal */
+    private async _withContainerCertificatePathsInternal(customCertificatesDestination?: string, defaultCertificateBundlePaths?: string[], defaultCertificateDirectoryPaths?: string[]): Promise<ContainerResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle };
+        if (customCertificatesDestination !== undefined) rpcArgs.customCertificatesDestination = customCertificatesDestination;
+        if (defaultCertificateBundlePaths !== undefined) rpcArgs.defaultCertificateBundlePaths = defaultCertificateBundlePaths;
+        if (defaultCertificateDirectoryPaths !== undefined) rpcArgs.defaultCertificateDirectoryPaths = defaultCertificateDirectoryPaths;
+        const result = await this._client.invokeCapability<ContainerResourceHandle>(
+            'Aspire.Hosting/withContainerCertificatePaths',
+            rpcArgs
+        );
+        return new ContainerResource(result, this._client);
+    }
+
+    /** Overrides container certificate bundle and directory paths used for trust configuration */
+    withContainerCertificatePaths(options?: WithContainerCertificatePathsOptions): ContainerResourcePromise {
+        const customCertificatesDestination = options?.customCertificatesDestination;
+        const defaultCertificateBundlePaths = options?.defaultCertificateBundlePaths;
+        const defaultCertificateDirectoryPaths = options?.defaultCertificateDirectoryPaths;
+        return new ContainerResourcePromise(this._withContainerCertificatePathsInternal(customCertificatesDestination, defaultCertificateBundlePaths, defaultCertificateDirectoryPaths));
     }
 
     /** @internal */
@@ -6743,41 +6250,11 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<ContainerResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new ContainerResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): ContainerResourcePromise {
-        return new ContainerResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<ContainerResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new ContainerResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): ContainerResourcePromise {
-        return new ContainerResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<ContainerResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<ContainerResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
@@ -6788,7 +6265,7 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): ContainerResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): ContainerResourcePromise {
         return new ContainerResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -6805,6 +6282,21 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): ContainerResourcePromise {
         return new ContainerResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<ContainerResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<ContainerResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new ContainerResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -6870,6 +6362,41 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): ContainerResourcePromise {
         return new ContainerResourcePromise(this._withArgsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<ContainerResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ContainerResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new ContainerResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<ContainerResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<ContainerResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new ContainerResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -7079,6 +6606,26 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<ContainerResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ContainerResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new ContainerResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<ContainerResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -7170,7 +6717,7 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<ContainerResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new ContainerResource(result, this._client);
@@ -7200,7 +6747,7 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<ContainerResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new ContainerResource(result, this._client);
@@ -7246,7 +6793,7 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new ContainerResource(result, this._client);
@@ -7351,7 +6898,7 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new ContainerResource(result, this._client);
@@ -7379,10 +6926,25 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<ContainerResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<ContainerResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new ContainerResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<ContainerResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new ContainerResource(result, this._client);
@@ -7397,7 +6959,7 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<ContainerResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new ContainerResource(result, this._client);
@@ -7525,6 +7087,26 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
         const tags = options?.tags;
         const description = options?.description;
         return new ContainerResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<ContainerResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ContainerResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new ContainerResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -7676,28 +7258,6 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<ContainerResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new ContainerResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): ContainerResourcePromise {
-        return new ContainerResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<ContainerResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<ContainerResourceHandle>(
@@ -7707,24 +7267,8 @@ export class ContainerResource extends ResourceBuilderBase<ContainerResourceHand
         return new ContainerResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ContainerResourcePromise {
         return new ContainerResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<ContainerResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<ContainerResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new ContainerResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ContainerResourcePromise {
-        return new ContainerResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -7809,14 +7353,19 @@ export class ContainerResourcePromise implements PromiseLike<ContainerResource> 
         return new ContainerResourcePromise(this._promise.then(obj => obj.withContainerName(name)));
     }
 
-    /** Adds a build argument from a parameter resource */
-    withBuildArg(name: string, value: ParameterResource): ContainerResourcePromise {
+    /** Adds a build argument from a string value or parameter resource */
+    withBuildArg(name: string, value: string | ParameterResource): ContainerResourcePromise {
         return new ContainerResourcePromise(this._promise.then(obj => obj.withBuildArg(name, value)));
     }
 
     /** Adds a build secret from a parameter resource */
     withBuildSecret(name: string, value: ParameterResource): ContainerResourcePromise {
         return new ContainerResourcePromise(this._promise.then(obj => obj.withBuildSecret(name, value)));
+    }
+
+    /** Overrides container certificate bundle and directory paths used for trust configuration */
+    withContainerCertificatePaths(options?: WithContainerCertificatePathsOptions): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._promise.then(obj => obj.withContainerCertificatePaths(options)));
     }
 
     /** Configures endpoint proxy support */
@@ -7859,24 +7408,19 @@ export class ContainerResourcePromise implements PromiseLike<ContainerResource> 
         return new ContainerResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): ContainerResourcePromise {
-        return new ContainerResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): ContainerResourcePromise {
-        return new ContainerResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): ContainerResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): ContainerResourcePromise {
         return new ContainerResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): ContainerResourcePromise {
         return new ContainerResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -7897,6 +7441,16 @@ export class ContainerResourcePromise implements PromiseLike<ContainerResource> 
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): ContainerResourcePromise {
         return new ContainerResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -7952,6 +7506,11 @@ export class ContainerResourcePromise implements PromiseLike<ContainerResource> 
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): ContainerResourcePromise {
         return new ContainerResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -8044,6 +7603,11 @@ export class ContainerResourcePromise implements PromiseLike<ContainerResource> 
         return new ContainerResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): ContainerResourcePromise {
         return new ContainerResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -8082,6 +7646,11 @@ export class ContainerResourcePromise implements PromiseLike<ContainerResource> 
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): ContainerResourcePromise {
         return new ContainerResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ContainerResourcePromise {
+        return new ContainerResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -8124,19 +7693,8 @@ export class ContainerResourcePromise implements PromiseLike<ContainerResource> 
         return new ContainerResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): ContainerResourcePromise {
-        return new ContainerResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ContainerResourcePromise {
         return new ContainerResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ContainerResourcePromise {
-        return new ContainerResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -8303,41 +7861,11 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<CSharpAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new CSharpAppResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): CSharpAppResourcePromise {
-        return new CSharpAppResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<CSharpAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new CSharpAppResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): CSharpAppResourcePromise {
-        return new CSharpAppResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<CSharpAppResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<CSharpAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
@@ -8348,7 +7876,7 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): CSharpAppResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -8365,6 +7893,21 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<CSharpAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new CSharpAppResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -8430,6 +7973,41 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._withArgsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<CSharpAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new CSharpAppResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<CSharpAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new CSharpAppResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -8639,6 +8217,26 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<CSharpAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new CSharpAppResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<CSharpAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -8715,7 +8313,7 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     private async _publishWithContainerFilesInternal(source: ResourceBuilderBase, destinationPath: string): Promise<CSharpAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, source, destinationPath };
         const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Aspire.Hosting/publishWithContainerFiles',
+            'Aspire.Hosting/publishWithContainerFilesFromResource',
             rpcArgs
         );
         return new CSharpAppResource(result, this._client);
@@ -8745,7 +8343,7 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<CSharpAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new CSharpAppResource(result, this._client);
@@ -8775,7 +8373,7 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<CSharpAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new CSharpAppResource(result, this._client);
@@ -8821,7 +8419,7 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new CSharpAppResource(result, this._client);
@@ -8926,7 +8524,7 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new CSharpAppResource(result, this._client);
@@ -8954,10 +8552,25 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<CSharpAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new CSharpAppResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<CSharpAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new CSharpAppResource(result, this._client);
@@ -8972,7 +8585,7 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<CSharpAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new CSharpAppResource(result, this._client);
@@ -9100,6 +8713,26 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
         const tags = options?.tags;
         const description = options?.description;
         return new CSharpAppResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<CSharpAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new CSharpAppResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -9232,28 +8865,6 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<CSharpAppResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new CSharpAppResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): CSharpAppResourcePromise {
-        return new CSharpAppResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<CSharpAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
@@ -9263,24 +8874,8 @@ export class CSharpAppResource extends ResourceBuilderBase<CSharpAppResourceHand
         return new CSharpAppResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<CSharpAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<CSharpAppResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new CSharpAppResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): CSharpAppResourcePromise {
-        return new CSharpAppResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -9345,24 +8940,19 @@ export class CSharpAppResourcePromise implements PromiseLike<CSharpAppResource> 
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): CSharpAppResourcePromise {
-        return new CSharpAppResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): CSharpAppResourcePromise {
-        return new CSharpAppResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): CSharpAppResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -9383,6 +8973,16 @@ export class CSharpAppResourcePromise implements PromiseLike<CSharpAppResource> 
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -9438,6 +9038,11 @@ export class CSharpAppResourcePromise implements PromiseLike<CSharpAppResource> 
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -9535,6 +9140,11 @@ export class CSharpAppResourcePromise implements PromiseLike<CSharpAppResource> 
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -9575,6 +9185,11 @@ export class CSharpAppResourcePromise implements PromiseLike<CSharpAppResource> 
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
     }
 
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): CSharpAppResourcePromise {
+        return new CSharpAppResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
+    }
+
     /** Configures pipeline step dependencies via a callback */
     withPipelineConfiguration(callback: (obj: PipelineConfigurationContext) => Promise<void>): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.withPipelineConfiguration(callback)));
@@ -9610,3169 +9225,8 @@ export class CSharpAppResourcePromise implements PromiseLike<CSharpAppResource> 
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): CSharpAppResourcePromise {
-        return new CSharpAppResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): CSharpAppResourcePromise {
         return new CSharpAppResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): CSharpAppResourcePromise {
-        return new CSharpAppResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
-    }
-
-}
-
-// ============================================================================
-// DockerComposeAspireDashboardResource
-// ============================================================================
-
-export class DockerComposeAspireDashboardResource extends ResourceBuilderBase<DockerComposeAspireDashboardResourceHandle> {
-    constructor(handle: DockerComposeAspireDashboardResourceHandle, client: AspireClientRpc) {
-        super(handle, client);
-    }
-
-    /** Gets the PrimaryEndpoint property */
-    primaryEndpoint = {
-        get: async (): Promise<EndpointReference> => {
-            const handle = await this._client.invokeCapability<EndpointReferenceHandle>(
-                'Aspire.Hosting.Docker/DockerComposeAspireDashboardResource.primaryEndpoint',
-                { context: this._handle }
-            );
-            return new EndpointReference(handle, this._client);
-        },
-    };
-
-    /** Gets the OtlpGrpcEndpoint property */
-    otlpGrpcEndpoint = {
-        get: async (): Promise<EndpointReference> => {
-            const handle = await this._client.invokeCapability<EndpointReferenceHandle>(
-                'Aspire.Hosting.Docker/DockerComposeAspireDashboardResource.otlpGrpcEndpoint',
-                { context: this._handle }
-            );
-            return new EndpointReference(handle, this._client);
-        },
-    };
-
-    /** Gets the Entrypoint property */
-    entrypoint = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker/DockerComposeAspireDashboardResource.entrypoint',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker/DockerComposeAspireDashboardResource.setEntrypoint',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the ShellExecution property */
-    shellExecution = {
-        get: async (): Promise<boolean> => {
-            return await this._client.invokeCapability<boolean>(
-                'Aspire.Hosting.Docker/DockerComposeAspireDashboardResource.shellExecution',
-                { context: this._handle }
-            );
-        },
-        set: async (value: boolean): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker/DockerComposeAspireDashboardResource.setShellExecution',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Name property */
-    name = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker/DockerComposeAspireDashboardResource.name',
-                { context: this._handle }
-            );
-        },
-    };
-
-    /** @internal */
-    private async _withContainerRegistryInternal(registry: ResourceBuilderBase): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, registry };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withContainerRegistry',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures a resource to use a container registry */
-    withContainerRegistry(registry: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withContainerRegistryInternal(registry));
-    }
-
-    /** @internal */
-    private async _withBindMountInternal(source: string, target: string, isReadOnly?: boolean): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, source, target };
-        if (isReadOnly !== undefined) rpcArgs.isReadOnly = isReadOnly;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withBindMount',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a bind mount */
-    withBindMount(source: string, target: string, options?: WithBindMountOptions): DockerComposeAspireDashboardResourcePromise {
-        const isReadOnly = options?.isReadOnly;
-        return new DockerComposeAspireDashboardResourcePromise(this._withBindMountInternal(source, target, isReadOnly));
-    }
-
-    /** @internal */
-    private async _withEntrypointInternal(entrypoint: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, entrypoint };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withEntrypoint',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the container entrypoint */
-    withEntrypoint(entrypoint: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withEntrypointInternal(entrypoint));
-    }
-
-    /** @internal */
-    private async _withImageTagInternal(tag: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, tag };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withImageTag',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the container image tag */
-    withImageTag(tag: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withImageTagInternal(tag));
-    }
-
-    /** @internal */
-    private async _withImageRegistryInternal(registry: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, registry };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withImageRegistry',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the container image registry */
-    withImageRegistry(registry: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withImageRegistryInternal(registry));
-    }
-
-    /** @internal */
-    private async _withImageInternal(image: string, tag?: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, image };
-        if (tag !== undefined) rpcArgs.tag = tag;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withImage',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the container image */
-    withImage(image: string, options?: WithImageOptions): DockerComposeAspireDashboardResourcePromise {
-        const tag = options?.tag;
-        return new DockerComposeAspireDashboardResourcePromise(this._withImageInternal(image, tag));
-    }
-
-    /** @internal */
-    private async _withImageSHA256Internal(sha256: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, sha256 };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withImageSHA256',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the image SHA256 digest */
-    withImageSHA256(sha256: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withImageSHA256Internal(sha256));
-    }
-
-    /** @internal */
-    private async _withContainerRuntimeArgsInternal(args: string[]): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, args };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withContainerRuntimeArgs',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds runtime arguments for the container */
-    withContainerRuntimeArgs(args: string[]): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withContainerRuntimeArgsInternal(args));
-    }
-
-    /** @internal */
-    private async _withLifetimeInternal(lifetime: ContainerLifetime): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, lifetime };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withLifetime',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the lifetime behavior of the container resource */
-    withLifetime(lifetime: ContainerLifetime): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withLifetimeInternal(lifetime));
-    }
-
-    /** @internal */
-    private async _withImagePullPolicyInternal(pullPolicy: ImagePullPolicy): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, pullPolicy };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withImagePullPolicy',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the container image pull policy */
-    withImagePullPolicy(pullPolicy: ImagePullPolicy): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withImagePullPolicyInternal(pullPolicy));
-    }
-
-    /** @internal */
-    private async _publishAsContainerInternal(): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/publishAsContainer',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures the resource to be published as a container */
-    publishAsContainer(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._publishAsContainerInternal());
-    }
-
-    /** @internal */
-    private async _withDockerfileInternal(contextPath: string, dockerfilePath?: string, stage?: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, contextPath };
-        if (dockerfilePath !== undefined) rpcArgs.dockerfilePath = dockerfilePath;
-        if (stage !== undefined) rpcArgs.stage = stage;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withDockerfile',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures the resource to use a Dockerfile */
-    withDockerfile(contextPath: string, options?: WithDockerfileOptions): DockerComposeAspireDashboardResourcePromise {
-        const dockerfilePath = options?.dockerfilePath;
-        const stage = options?.stage;
-        return new DockerComposeAspireDashboardResourcePromise(this._withDockerfileInternal(contextPath, dockerfilePath, stage));
-    }
-
-    /** @internal */
-    private async _withContainerNameInternal(name: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withContainerName',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the container name */
-    withContainerName(name: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withContainerNameInternal(name));
-    }
-
-    /** @internal */
-    private async _withBuildArgInternal(name: string, value: ParameterResource): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withBuildArg',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a build argument from a parameter resource */
-    withBuildArg(name: string, value: ParameterResource): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withBuildArgInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withBuildSecretInternal(name: string, value: ParameterResource): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withBuildSecret',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a build secret from a parameter resource */
-    withBuildSecret(name: string, value: ParameterResource): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withBuildSecretInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEndpointProxySupportInternal(proxyEnabled: boolean): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, proxyEnabled };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withEndpointProxySupport',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures endpoint proxy support */
-    withEndpointProxySupport(proxyEnabled: boolean): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withEndpointProxySupportInternal(proxyEnabled));
-    }
-
-    /** @internal */
-    private async _withDockerfileBaseImageInternal(buildImage?: string, runtimeImage?: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (buildImage !== undefined) rpcArgs.buildImage = buildImage;
-        if (runtimeImage !== undefined) rpcArgs.runtimeImage = runtimeImage;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withDockerfileBaseImage',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the base image for a Dockerfile build */
-    withDockerfileBaseImage(options?: WithDockerfileBaseImageOptions): DockerComposeAspireDashboardResourcePromise {
-        const buildImage = options?.buildImage;
-        const runtimeImage = options?.runtimeImage;
-        return new DockerComposeAspireDashboardResourcePromise(this._withDockerfileBaseImageInternal(buildImage, runtimeImage));
-    }
-
-    /** @internal */
-    private async _withContainerNetworkAliasInternal(alias: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, alias };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withContainerNetworkAlias',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a network alias for the container */
-    withContainerNetworkAlias(alias: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withContainerNetworkAliasInternal(alias));
-    }
-
-    /** @internal */
-    private async _withMcpServerInternal(path?: string, endpointName?: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (path !== undefined) rpcArgs.path = path;
-        if (endpointName !== undefined) rpcArgs.endpointName = endpointName;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withMcpServer',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures an MCP server endpoint on the resource */
-    withMcpServer(options?: WithMcpServerOptions): DockerComposeAspireDashboardResourcePromise {
-        const path = options?.path;
-        const endpointName = options?.endpointName;
-        return new DockerComposeAspireDashboardResourcePromise(this._withMcpServerInternal(path, endpointName));
-    }
-
-    /** @internal */
-    private async _withOtlpExporterInternal(): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withOtlpExporter',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures OTLP telemetry export */
-    withOtlpExporter(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withOtlpExporterInternal());
-    }
-
-    /** @internal */
-    private async _withOtlpExporterProtocolInternal(protocol: OtlpProtocol): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, protocol };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withOtlpExporterProtocol',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures OTLP telemetry export with specific protocol */
-    withOtlpExporterProtocol(protocol: OtlpProtocol): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withOtlpExporterProtocolInternal(protocol));
-    }
-
-    /** @internal */
-    private async _publishAsConnectionStringInternal(): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/publishAsConnectionString',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Publishes the resource as a connection string */
-    publishAsConnectionString(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._publishAsConnectionStringInternal());
-    }
-
-    /** @internal */
-    private async _withRequiredCommandInternal(command: string, helpLink?: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, command };
-        if (helpLink !== undefined) rpcArgs.helpLink = helpLink;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withRequiredCommand',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a required command dependency */
-    withRequiredCommand(command: string, options?: WithRequiredCommandOptions): DockerComposeAspireDashboardResourcePromise {
-        const helpLink = options?.helpLink;
-        return new DockerComposeAspireDashboardResourcePromise(this._withRequiredCommandInternal(command, helpLink));
-    }
-
-    /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withEnvironmentCallback',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withEnvironmentCallbackInternal(callback));
-    }
-
-    /** @internal */
-    private async _withEnvironmentEndpointInternal(name: string, endpointReference: EndpointReference): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, endpointReference };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withEnvironmentEndpoint',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets an environment variable from an endpoint reference */
-    withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
-    }
-
-    /** @internal */
-    private async _withEnvironmentParameterInternal(name: string, parameter: ParameterResource): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, parameter };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withEnvironmentParameter',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets an environment variable from a parameter resource */
-    withEnvironmentParameter(name: string, parameter: ParameterResource): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withEnvironmentParameterInternal(name, parameter));
-    }
-
-    /** @internal */
-    private async _withEnvironmentConnectionStringInternal(envVarName: string, resource: ResourceBuilderBase): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, envVarName, resource };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withEnvironmentConnectionString',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets an environment variable from a connection string resource */
-    withEnvironmentConnectionString(envVarName: string, resource: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withEnvironmentConnectionStringInternal(envVarName, resource));
-    }
-
-    /** @internal */
-    private async _withArgsInternal(args: string[]): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, args };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withArgs',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds arguments */
-    withArgs(args: string[]): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withArgsInternal(args));
-    }
-
-    /** @internal */
-    private async _withArgsCallbackInternal(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as CommandLineArgsCallbackContextHandle;
-            const obj = new CommandLineArgsCallbackContext(objHandle, this._client);
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withArgsCallback',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets command-line arguments via callback */
-    withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withArgsCallbackInternal(callback));
-    }
-
-    /** @internal */
-    private async _withReferenceInternal(source: ResourceBuilderBase, connectionName?: string, optional?: boolean, name?: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, source };
-        if (connectionName !== undefined) rpcArgs.connectionName = connectionName;
-        if (optional !== undefined) rpcArgs.optional = optional;
-        if (name !== undefined) rpcArgs.name = name;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withReference',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a reference to another resource */
-    withReference(source: ResourceBuilderBase, options?: WithReferenceOptions): DockerComposeAspireDashboardResourcePromise {
-        const connectionName = options?.connectionName;
-        const optional = options?.optional;
-        const name = options?.name;
-        return new DockerComposeAspireDashboardResourcePromise(this._withReferenceInternal(source, connectionName, optional, name));
-    }
-
-    /** @internal */
-    private async _withReferenceUriInternal(name: string, uri: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, uri };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withReferenceUri',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a reference to a URI */
-    withReferenceUri(name: string, uri: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withReferenceUriInternal(name, uri));
-    }
-
-    /** @internal */
-    private async _withReferenceExternalServiceInternal(externalService: ExternalServiceResource): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, externalService };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withReferenceExternalService',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a reference to an external service */
-    withReferenceExternalService(externalService: ExternalServiceResource): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withReferenceExternalServiceInternal(externalService));
-    }
-
-    /** @internal */
-    private async _withReferenceEndpointInternal(endpointReference: EndpointReference): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, endpointReference };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withReferenceEndpoint',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a reference to an endpoint */
-    withReferenceEndpoint(endpointReference: EndpointReference): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withReferenceEndpointInternal(endpointReference));
-    }
-
-    /** @internal */
-    private async _withEndpointInternal(port?: number, targetPort?: number, scheme?: string, name?: string, env?: string, isProxied?: boolean, isExternal?: boolean, protocol?: ProtocolType): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (port !== undefined) rpcArgs.port = port;
-        if (targetPort !== undefined) rpcArgs.targetPort = targetPort;
-        if (scheme !== undefined) rpcArgs.scheme = scheme;
-        if (name !== undefined) rpcArgs.name = name;
-        if (env !== undefined) rpcArgs.env = env;
-        if (isProxied !== undefined) rpcArgs.isProxied = isProxied;
-        if (isExternal !== undefined) rpcArgs.isExternal = isExternal;
-        if (protocol !== undefined) rpcArgs.protocol = protocol;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withEndpoint',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a network endpoint */
-    withEndpoint(options?: WithEndpointOptions): DockerComposeAspireDashboardResourcePromise {
-        const port = options?.port;
-        const targetPort = options?.targetPort;
-        const scheme = options?.scheme;
-        const name = options?.name;
-        const env = options?.env;
-        const isProxied = options?.isProxied;
-        const isExternal = options?.isExternal;
-        const protocol = options?.protocol;
-        return new DockerComposeAspireDashboardResourcePromise(this._withEndpointInternal(port, targetPort, scheme, name, env, isProxied, isExternal, protocol));
-    }
-
-    /** @internal */
-    private async _withHttpEndpointInternal(port?: number, targetPort?: number, name?: string, env?: string, isProxied?: boolean): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (port !== undefined) rpcArgs.port = port;
-        if (targetPort !== undefined) rpcArgs.targetPort = targetPort;
-        if (name !== undefined) rpcArgs.name = name;
-        if (env !== undefined) rpcArgs.env = env;
-        if (isProxied !== undefined) rpcArgs.isProxied = isProxied;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withHttpEndpoint',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds an HTTP endpoint */
-    withHttpEndpoint(options?: WithHttpEndpointOptions): DockerComposeAspireDashboardResourcePromise {
-        const port = options?.port;
-        const targetPort = options?.targetPort;
-        const name = options?.name;
-        const env = options?.env;
-        const isProxied = options?.isProxied;
-        return new DockerComposeAspireDashboardResourcePromise(this._withHttpEndpointInternal(port, targetPort, name, env, isProxied));
-    }
-
-    /** @internal */
-    private async _withHttpsEndpointInternal(port?: number, targetPort?: number, name?: string, env?: string, isProxied?: boolean): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (port !== undefined) rpcArgs.port = port;
-        if (targetPort !== undefined) rpcArgs.targetPort = targetPort;
-        if (name !== undefined) rpcArgs.name = name;
-        if (env !== undefined) rpcArgs.env = env;
-        if (isProxied !== undefined) rpcArgs.isProxied = isProxied;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withHttpsEndpoint',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds an HTTPS endpoint */
-    withHttpsEndpoint(options?: WithHttpsEndpointOptions): DockerComposeAspireDashboardResourcePromise {
-        const port = options?.port;
-        const targetPort = options?.targetPort;
-        const name = options?.name;
-        const env = options?.env;
-        const isProxied = options?.isProxied;
-        return new DockerComposeAspireDashboardResourcePromise(this._withHttpsEndpointInternal(port, targetPort, name, env, isProxied));
-    }
-
-    /** @internal */
-    private async _withExternalHttpEndpointsInternal(): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withExternalHttpEndpoints',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Makes HTTP endpoints externally accessible */
-    withExternalHttpEndpoints(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withExternalHttpEndpointsInternal());
-    }
-
-    /** Gets an endpoint reference */
-    async getEndpoint(name: string): Promise<EndpointReference> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name };
-        return await this._client.invokeCapability<EndpointReference>(
-            'Aspire.Hosting/getEndpoint',
-            rpcArgs
-        );
-    }
-
-    /** @internal */
-    private async _asHttp2ServiceInternal(): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/asHttp2Service',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures resource for HTTP/2 */
-    asHttp2Service(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._asHttp2ServiceInternal());
-    }
-
-    /** @internal */
-    private async _withUrlsCallbackInternal(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as ResourceUrlsCallbackContextHandle;
-            const obj = new ResourceUrlsCallbackContext(objHandle, this._client);
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withUrlsCallback',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Customizes displayed URLs via callback */
-    withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withUrlsCallbackInternal(callback));
-    }
-
-    /** @internal */
-    private async _withUrlInternal(url: string, displayText?: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
-        if (displayText !== undefined) rpcArgs.displayText = displayText;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withUrl',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds or modifies displayed URLs */
-    withUrl(url: string, options?: WithUrlOptions): DockerComposeAspireDashboardResourcePromise {
-        const displayText = options?.displayText;
-        return new DockerComposeAspireDashboardResourcePromise(this._withUrlInternal(url, displayText));
-    }
-
-    /** @internal */
-    private async _withUrlExpressionInternal(url: ReferenceExpression, displayText?: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
-        if (displayText !== undefined) rpcArgs.displayText = displayText;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withUrlExpression',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a URL using a reference expression */
-    withUrlExpression(url: ReferenceExpression, options?: WithUrlExpressionOptions): DockerComposeAspireDashboardResourcePromise {
-        const displayText = options?.displayText;
-        return new DockerComposeAspireDashboardResourcePromise(this._withUrlExpressionInternal(url, displayText));
-    }
-
-    /** @internal */
-    private async _withUrlForEndpointInternal(endpointName: string, callback: (obj: ResourceUrlAnnotation) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const obj = wrapIfHandle(objData) as ResourceUrlAnnotation;
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, endpointName, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withUrlForEndpoint',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Customizes the URL for a specific endpoint via callback */
-    withUrlForEndpoint(endpointName: string, callback: (obj: ResourceUrlAnnotation) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withUrlForEndpointInternal(endpointName, callback));
-    }
-
-    /** @internal */
-    private async _withUrlForEndpointFactoryInternal(endpointName: string, callback: (arg: EndpointReference) => Promise<ResourceUrlAnnotation>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as EndpointReferenceHandle;
-            const arg = new EndpointReference(argHandle, this._client);
-            return await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, endpointName, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withUrlForEndpointFactory',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a URL for a specific endpoint via factory callback */
-    withUrlForEndpointFactory(endpointName: string, callback: (arg: EndpointReference) => Promise<ResourceUrlAnnotation>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withUrlForEndpointFactoryInternal(endpointName, callback));
-    }
-
-    /** @internal */
-    private async _excludeFromManifestInternal(): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/excludeFromManifest',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Excludes the resource from the deployment manifest */
-    excludeFromManifest(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._excludeFromManifestInternal());
-    }
-
-    /** @internal */
-    private async _waitForInternal(dependency: ResourceBuilderBase): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/waitFor',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Waits for another resource to be ready */
-    waitFor(dependency: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._waitForInternal(dependency));
-    }
-
-    /** @internal */
-    private async _waitForWithBehaviorInternal(dependency: ResourceBuilderBase, waitBehavior: WaitBehavior): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency, waitBehavior };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/waitForWithBehavior',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Waits for another resource with specific behavior */
-    waitForWithBehavior(dependency: ResourceBuilderBase, waitBehavior: WaitBehavior): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._waitForWithBehaviorInternal(dependency, waitBehavior));
-    }
-
-    /** @internal */
-    private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/waitForStart',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Waits for another resource to start */
-    waitForStart(dependency: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._waitForStartInternal(dependency));
-    }
-
-    /** @internal */
-    private async _waitForStartWithBehaviorInternal(dependency: ResourceBuilderBase, waitBehavior: WaitBehavior): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency, waitBehavior };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/waitForStartWithBehavior',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Waits for another resource to start with specific behavior */
-    waitForStartWithBehavior(dependency: ResourceBuilderBase, waitBehavior: WaitBehavior): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._waitForStartWithBehaviorInternal(dependency, waitBehavior));
-    }
-
-    /** @internal */
-    private async _withExplicitStartInternal(): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withExplicitStart',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Prevents resource from starting automatically */
-    withExplicitStart(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withExplicitStartInternal());
-    }
-
-    /** @internal */
-    private async _waitForCompletionInternal(dependency: ResourceBuilderBase, exitCode?: number): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
-        if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Waits for resource completion */
-    waitForCompletion(dependency: ResourceBuilderBase, options?: WaitForCompletionOptions): DockerComposeAspireDashboardResourcePromise {
-        const exitCode = options?.exitCode;
-        return new DockerComposeAspireDashboardResourcePromise(this._waitForCompletionInternal(dependency, exitCode));
-    }
-
-    /** @internal */
-    private async _withHealthCheckInternal(key: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, key };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withHealthCheck',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a health check by key */
-    withHealthCheck(key: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withHealthCheckInternal(key));
-    }
-
-    /** @internal */
-    private async _withHttpHealthCheckInternal(path?: string, statusCode?: number, endpointName?: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (path !== undefined) rpcArgs.path = path;
-        if (statusCode !== undefined) rpcArgs.statusCode = statusCode;
-        if (endpointName !== undefined) rpcArgs.endpointName = endpointName;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withHttpHealthCheck',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds an HTTP health check */
-    withHttpHealthCheck(options?: WithHttpHealthCheckOptions): DockerComposeAspireDashboardResourcePromise {
-        const path = options?.path;
-        const statusCode = options?.statusCode;
-        const endpointName = options?.endpointName;
-        return new DockerComposeAspireDashboardResourcePromise(this._withHttpHealthCheckInternal(path, statusCode, endpointName));
-    }
-
-    /** @internal */
-    private async _withCommandInternal(name: string, displayName: string, executeCommand: (arg: ExecuteCommandContext) => Promise<ExecuteCommandResult>, commandOptions?: CommandOptions): Promise<DockerComposeAspireDashboardResource> {
-        const executeCommandId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as ExecuteCommandContextHandle;
-            const arg = new ExecuteCommandContext(argHandle, this._client);
-            return await executeCommand(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, displayName, executeCommand: executeCommandId };
-        if (commandOptions !== undefined) rpcArgs.commandOptions = commandOptions;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withCommand',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a resource command */
-    withCommand(name: string, displayName: string, executeCommand: (arg: ExecuteCommandContext) => Promise<ExecuteCommandResult>, options?: WithCommandOptions): DockerComposeAspireDashboardResourcePromise {
-        const commandOptions = options?.commandOptions;
-        return new DockerComposeAspireDashboardResourcePromise(this._withCommandInternal(name, displayName, executeCommand, commandOptions));
-    }
-
-    /** @internal */
-    private async _withDeveloperCertificateTrustInternal(trust: boolean): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, trust };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withDeveloperCertificateTrust',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures developer certificate trust */
-    withDeveloperCertificateTrust(trust: boolean): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withDeveloperCertificateTrustInternal(trust));
-    }
-
-    /** @internal */
-    private async _withCertificateTrustScopeInternal(scope: CertificateTrustScope): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, scope };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withCertificateTrustScope',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the certificate trust scope */
-    withCertificateTrustScope(scope: CertificateTrustScope): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withCertificateTrustScopeInternal(scope));
-    }
-
-    /** @internal */
-    private async _withHttpsDeveloperCertificateInternal(password?: ParameterResource): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (password !== undefined) rpcArgs.password = password;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures HTTPS with a developer certificate */
-    withHttpsDeveloperCertificate(options?: WithHttpsDeveloperCertificateOptions): DockerComposeAspireDashboardResourcePromise {
-        const password = options?.password;
-        return new DockerComposeAspireDashboardResourcePromise(this._withHttpsDeveloperCertificateInternal(password));
-    }
-
-    /** @internal */
-    private async _withoutHttpsCertificateInternal(): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withoutHttpsCertificate',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Removes HTTPS certificate configuration */
-    withoutHttpsCertificate(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withoutHttpsCertificateInternal());
-    }
-
-    /** @internal */
-    private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the parent relationship */
-    withParentRelationship(parent: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withParentRelationshipInternal(parent));
-    }
-
-    /** @internal */
-    private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets a child relationship */
-    withChildRelationship(child: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withChildRelationshipInternal(child));
-    }
-
-    /** @internal */
-    private async _withIconNameInternal(iconName: string, iconVariant?: IconVariant): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, iconName };
-        if (iconVariant !== undefined) rpcArgs.iconVariant = iconVariant;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withIconName',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the icon for the resource */
-    withIconName(iconName: string, options?: WithIconNameOptions): DockerComposeAspireDashboardResourcePromise {
-        const iconVariant = options?.iconVariant;
-        return new DockerComposeAspireDashboardResourcePromise(this._withIconNameInternal(iconName, iconVariant));
-    }
-
-    /** @internal */
-    private async _withHttpProbeInternal(probeType: ProbeType, path?: string, initialDelaySeconds?: number, periodSeconds?: number, timeoutSeconds?: number, failureThreshold?: number, successThreshold?: number, endpointName?: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, probeType };
-        if (path !== undefined) rpcArgs.path = path;
-        if (initialDelaySeconds !== undefined) rpcArgs.initialDelaySeconds = initialDelaySeconds;
-        if (periodSeconds !== undefined) rpcArgs.periodSeconds = periodSeconds;
-        if (timeoutSeconds !== undefined) rpcArgs.timeoutSeconds = timeoutSeconds;
-        if (failureThreshold !== undefined) rpcArgs.failureThreshold = failureThreshold;
-        if (successThreshold !== undefined) rpcArgs.successThreshold = successThreshold;
-        if (endpointName !== undefined) rpcArgs.endpointName = endpointName;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withHttpProbe',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds an HTTP health probe to the resource */
-    withHttpProbe(probeType: ProbeType, options?: WithHttpProbeOptions): DockerComposeAspireDashboardResourcePromise {
-        const path = options?.path;
-        const initialDelaySeconds = options?.initialDelaySeconds;
-        const periodSeconds = options?.periodSeconds;
-        const timeoutSeconds = options?.timeoutSeconds;
-        const failureThreshold = options?.failureThreshold;
-        const successThreshold = options?.successThreshold;
-        const endpointName = options?.endpointName;
-        return new DockerComposeAspireDashboardResourcePromise(this._withHttpProbeInternal(probeType, path, initialDelaySeconds, periodSeconds, timeoutSeconds, failureThreshold, successThreshold, endpointName));
-    }
-
-    /** @internal */
-    private async _excludeFromMcpInternal(): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/excludeFromMcp',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Excludes the resource from MCP server exposure */
-    excludeFromMcp(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._excludeFromMcpInternal());
-    }
-
-    /** @internal */
-    private async _withRemoteImageNameInternal(remoteImageName: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, remoteImageName };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withRemoteImageName',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the remote image name for publishing */
-    withRemoteImageName(remoteImageName: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withRemoteImageNameInternal(remoteImageName));
-    }
-
-    /** @internal */
-    private async _withRemoteImageTagInternal(remoteImageTag: string): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, remoteImageTag };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withRemoteImageTag',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the remote image tag for publishing */
-    withRemoteImageTag(remoteImageTag: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withRemoteImageTagInternal(remoteImageTag));
-    }
-
-    /** @internal */
-    private async _withPipelineStepFactoryInternal(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, dependsOn?: string[], requiredBy?: string[], tags?: string[], description?: string): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as PipelineStepContextHandle;
-            const arg = new PipelineStepContext(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, stepName, callback: callbackId };
-        if (dependsOn !== undefined) rpcArgs.dependsOn = dependsOn;
-        if (requiredBy !== undefined) rpcArgs.requiredBy = requiredBy;
-        if (tags !== undefined) rpcArgs.tags = tags;
-        if (description !== undefined) rpcArgs.description = description;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withPipelineStepFactory',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a pipeline step to the resource */
-    withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): DockerComposeAspireDashboardResourcePromise {
-        const dependsOn = options?.dependsOn;
-        const requiredBy = options?.requiredBy;
-        const tags = options?.tags;
-        const description = options?.description;
-        return new DockerComposeAspireDashboardResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
-    }
-
-    /** @internal */
-    private async _withPipelineConfigurationInternal(callback: (obj: PipelineConfigurationContext) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as PipelineConfigurationContextHandle;
-            const obj = new PipelineConfigurationContext(objHandle, this._client);
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withPipelineConfiguration',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Configures pipeline step dependencies via a callback */
-    withPipelineConfiguration(callback: (obj: PipelineConfigurationContext) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._withPipelineConfigurationInternal(callback));
-    }
-
-    /** @internal */
-    private async _withVolumeInternal(target: string, name?: string, isReadOnly?: boolean): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { resource: this._handle, target };
-        if (name !== undefined) rpcArgs.name = name;
-        if (isReadOnly !== undefined) rpcArgs.isReadOnly = isReadOnly;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/withVolume',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Adds a volume */
-    withVolume(target: string, options?: WithVolumeOptions): DockerComposeAspireDashboardResourcePromise {
-        const name = options?.name;
-        const isReadOnly = options?.isReadOnly;
-        return new DockerComposeAspireDashboardResourcePromise(this._withVolumeInternal(target, name, isReadOnly));
-    }
-
-    /** Gets the resource name */
-    async getResourceName(): Promise<string> {
-        const rpcArgs: Record<string, unknown> = { resource: this._handle };
-        return await this._client.invokeCapability<string>(
-            'Aspire.Hosting/getResourceName',
-            rpcArgs
-        );
-    }
-
-    /** @internal */
-    private async _onBeforeResourceStartedInternal(callback: (arg: BeforeResourceStartedEvent) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as BeforeResourceStartedEventHandle;
-            const arg = new BeforeResourceStartedEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/onBeforeResourceStarted',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Subscribes to the BeforeResourceStarted event */
-    onBeforeResourceStarted(callback: (arg: BeforeResourceStartedEvent) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._onBeforeResourceStartedInternal(callback));
-    }
-
-    /** @internal */
-    private async _onResourceStoppedInternal(callback: (arg: ResourceStoppedEvent) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as ResourceStoppedEventHandle;
-            const arg = new ResourceStoppedEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/onResourceStopped',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Subscribes to the ResourceStopped event */
-    onResourceStopped(callback: (arg: ResourceStoppedEvent) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._onResourceStoppedInternal(callback));
-    }
-
-    /** @internal */
-    private async _onInitializeResourceInternal(callback: (arg: InitializeResourceEvent) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as InitializeResourceEventHandle;
-            const arg = new InitializeResourceEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/onInitializeResource',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Subscribes to the InitializeResource event */
-    onInitializeResource(callback: (arg: InitializeResourceEvent) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._onInitializeResourceInternal(callback));
-    }
-
-    /** @internal */
-    private async _onResourceEndpointsAllocatedInternal(callback: (arg: ResourceEndpointsAllocatedEvent) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as ResourceEndpointsAllocatedEventHandle;
-            const arg = new ResourceEndpointsAllocatedEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/onResourceEndpointsAllocated',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Subscribes to the ResourceEndpointsAllocated event */
-    onResourceEndpointsAllocated(callback: (arg: ResourceEndpointsAllocatedEvent) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._onResourceEndpointsAllocatedInternal(callback));
-    }
-
-    /** @internal */
-    private async _onResourceReadyInternal(callback: (arg: ResourceReadyEvent) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as ResourceReadyEventHandle;
-            const arg = new ResourceReadyEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting/onResourceReady',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Subscribes to the ResourceReady event */
-    onResourceReady(callback: (arg: ResourceReadyEvent) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._onResourceReadyInternal(callback));
-    }
-
-    /** @internal */
-    private async _withHostPortInternal(port?: number): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (port !== undefined) rpcArgs.port = port;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting.Docker/withHostPort',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Sets the host port for the Aspire dashboard */
-    withHostPort(options?: WithHostPortOptions): DockerComposeAspireDashboardResourcePromise {
-        const port = options?.port;
-        return new DockerComposeAspireDashboardResourcePromise(this._withHostPortInternal(port));
-    }
-
-    /** @internal */
-    private async _withForwardedHeadersInternal(enabled?: boolean): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (enabled !== undefined) rpcArgs.enabled = enabled;
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting.Docker/withForwardedHeaders',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Enables or disables forwarded headers support for the Aspire dashboard */
-    withForwardedHeaders(options?: WithForwardedHeadersOptions): DockerComposeAspireDashboardResourcePromise {
-        const enabled = options?.enabled;
-        return new DockerComposeAspireDashboardResourcePromise(this._withForwardedHeadersInternal(enabled));
-    }
-
-    /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<DockerComposeAspireDashboardResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
-    private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokploy',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy */
-    publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<DockerComposeAspireDashboardResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<DockerComposeAspireDashboardResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new DockerComposeAspireDashboardResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
-    }
-
-}
-
-/**
- * Thenable wrapper for DockerComposeAspireDashboardResource that enables fluent chaining.
- * @example
- * await builder.addSomething().withX().withY();
- */
-export class DockerComposeAspireDashboardResourcePromise implements PromiseLike<DockerComposeAspireDashboardResource> {
-    constructor(private _promise: Promise<DockerComposeAspireDashboardResource>) {}
-
-    then<TResult1 = DockerComposeAspireDashboardResource, TResult2 = never>(
-        onfulfilled?: ((value: DockerComposeAspireDashboardResource) => TResult1 | PromiseLike<TResult1>) | null,
-        onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
-    ): PromiseLike<TResult1 | TResult2> {
-        return this._promise.then(onfulfilled, onrejected);
-    }
-
-    /** Configures a resource to use a container registry */
-    withContainerRegistry(registry: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withContainerRegistry(registry)));
-    }
-
-    /** Adds a bind mount */
-    withBindMount(source: string, target: string, options?: WithBindMountOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withBindMount(source, target, options)));
-    }
-
-    /** Sets the container entrypoint */
-    withEntrypoint(entrypoint: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withEntrypoint(entrypoint)));
-    }
-
-    /** Sets the container image tag */
-    withImageTag(tag: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withImageTag(tag)));
-    }
-
-    /** Sets the container image registry */
-    withImageRegistry(registry: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withImageRegistry(registry)));
-    }
-
-    /** Sets the container image */
-    withImage(image: string, options?: WithImageOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withImage(image, options)));
-    }
-
-    /** Sets the image SHA256 digest */
-    withImageSHA256(sha256: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withImageSHA256(sha256)));
-    }
-
-    /** Adds runtime arguments for the container */
-    withContainerRuntimeArgs(args: string[]): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withContainerRuntimeArgs(args)));
-    }
-
-    /** Sets the lifetime behavior of the container resource */
-    withLifetime(lifetime: ContainerLifetime): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withLifetime(lifetime)));
-    }
-
-    /** Sets the container image pull policy */
-    withImagePullPolicy(pullPolicy: ImagePullPolicy): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withImagePullPolicy(pullPolicy)));
-    }
-
-    /** Configures the resource to be published as a container */
-    publishAsContainer(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.publishAsContainer()));
-    }
-
-    /** Configures the resource to use a Dockerfile */
-    withDockerfile(contextPath: string, options?: WithDockerfileOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withDockerfile(contextPath, options)));
-    }
-
-    /** Sets the container name */
-    withContainerName(name: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withContainerName(name)));
-    }
-
-    /** Adds a build argument from a parameter resource */
-    withBuildArg(name: string, value: ParameterResource): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withBuildArg(name, value)));
-    }
-
-    /** Adds a build secret from a parameter resource */
-    withBuildSecret(name: string, value: ParameterResource): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withBuildSecret(name, value)));
-    }
-
-    /** Configures endpoint proxy support */
-    withEndpointProxySupport(proxyEnabled: boolean): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withEndpointProxySupport(proxyEnabled)));
-    }
-
-    /** Sets the base image for a Dockerfile build */
-    withDockerfileBaseImage(options?: WithDockerfileBaseImageOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withDockerfileBaseImage(options)));
-    }
-
-    /** Adds a network alias for the container */
-    withContainerNetworkAlias(alias: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withContainerNetworkAlias(alias)));
-    }
-
-    /** Configures an MCP server endpoint on the resource */
-    withMcpServer(options?: WithMcpServerOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withMcpServer(options)));
-    }
-
-    /** Configures OTLP telemetry export */
-    withOtlpExporter(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withOtlpExporter()));
-    }
-
-    /** Configures OTLP telemetry export with specific protocol */
-    withOtlpExporterProtocol(protocol: OtlpProtocol): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withOtlpExporterProtocol(protocol)));
-    }
-
-    /** Publishes the resource as a connection string */
-    publishAsConnectionString(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.publishAsConnectionString()));
-    }
-
-    /** Adds a required command dependency */
-    withRequiredCommand(command: string, options?: WithRequiredCommandOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
-    /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
-    }
-
-    /** Sets an environment variable from an endpoint reference */
-    withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
-    }
-
-    /** Sets an environment variable from a parameter resource */
-    withEnvironmentParameter(name: string, parameter: ParameterResource): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withEnvironmentParameter(name, parameter)));
-    }
-
-    /** Sets an environment variable from a connection string resource */
-    withEnvironmentConnectionString(envVarName: string, resource: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withEnvironmentConnectionString(envVarName, resource)));
-    }
-
-    /** Adds arguments */
-    withArgs(args: string[]): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withArgs(args)));
-    }
-
-    /** Sets command-line arguments via callback */
-    withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
-    }
-
-    /** Adds a reference to another resource */
-    withReference(source: ResourceBuilderBase, options?: WithReferenceOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withReference(source, options)));
-    }
-
-    /** Adds a reference to a URI */
-    withReferenceUri(name: string, uri: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withReferenceUri(name, uri)));
-    }
-
-    /** Adds a reference to an external service */
-    withReferenceExternalService(externalService: ExternalServiceResource): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withReferenceExternalService(externalService)));
-    }
-
-    /** Adds a reference to an endpoint */
-    withReferenceEndpoint(endpointReference: EndpointReference): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withReferenceEndpoint(endpointReference)));
-    }
-
-    /** Adds a network endpoint */
-    withEndpoint(options?: WithEndpointOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withEndpoint(options)));
-    }
-
-    /** Adds an HTTP endpoint */
-    withHttpEndpoint(options?: WithHttpEndpointOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withHttpEndpoint(options)));
-    }
-
-    /** Adds an HTTPS endpoint */
-    withHttpsEndpoint(options?: WithHttpsEndpointOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withHttpsEndpoint(options)));
-    }
-
-    /** Makes HTTP endpoints externally accessible */
-    withExternalHttpEndpoints(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withExternalHttpEndpoints()));
-    }
-
-    /** Gets an endpoint reference */
-    getEndpoint(name: string): Promise<EndpointReference> {
-        return this._promise.then(obj => obj.getEndpoint(name));
-    }
-
-    /** Configures resource for HTTP/2 */
-    asHttp2Service(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.asHttp2Service()));
-    }
-
-    /** Customizes displayed URLs via callback */
-    withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
-    }
-
-    /** Adds or modifies displayed URLs */
-    withUrl(url: string, options?: WithUrlOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withUrl(url, options)));
-    }
-
-    /** Adds a URL using a reference expression */
-    withUrlExpression(url: ReferenceExpression, options?: WithUrlExpressionOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withUrlExpression(url, options)));
-    }
-
-    /** Customizes the URL for a specific endpoint via callback */
-    withUrlForEndpoint(endpointName: string, callback: (obj: ResourceUrlAnnotation) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withUrlForEndpoint(endpointName, callback)));
-    }
-
-    /** Adds a URL for a specific endpoint via factory callback */
-    withUrlForEndpointFactory(endpointName: string, callback: (arg: EndpointReference) => Promise<ResourceUrlAnnotation>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withUrlForEndpointFactory(endpointName, callback)));
-    }
-
-    /** Excludes the resource from the deployment manifest */
-    excludeFromManifest(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.excludeFromManifest()));
-    }
-
-    /** Waits for another resource to be ready */
-    waitFor(dependency: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.waitFor(dependency)));
-    }
-
-    /** Waits for another resource with specific behavior */
-    waitForWithBehavior(dependency: ResourceBuilderBase, waitBehavior: WaitBehavior): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.waitForWithBehavior(dependency, waitBehavior)));
-    }
-
-    /** Waits for another resource to start */
-    waitForStart(dependency: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.waitForStart(dependency)));
-    }
-
-    /** Waits for another resource to start with specific behavior */
-    waitForStartWithBehavior(dependency: ResourceBuilderBase, waitBehavior: WaitBehavior): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.waitForStartWithBehavior(dependency, waitBehavior)));
-    }
-
-    /** Prevents resource from starting automatically */
-    withExplicitStart(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withExplicitStart()));
-    }
-
-    /** Waits for resource completion */
-    waitForCompletion(dependency: ResourceBuilderBase, options?: WaitForCompletionOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.waitForCompletion(dependency, options)));
-    }
-
-    /** Adds a health check by key */
-    withHealthCheck(key: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withHealthCheck(key)));
-    }
-
-    /** Adds an HTTP health check */
-    withHttpHealthCheck(options?: WithHttpHealthCheckOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withHttpHealthCheck(options)));
-    }
-
-    /** Adds a resource command */
-    withCommand(name: string, displayName: string, executeCommand: (arg: ExecuteCommandContext) => Promise<ExecuteCommandResult>, options?: WithCommandOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withCommand(name, displayName, executeCommand, options)));
-    }
-
-    /** Configures developer certificate trust */
-    withDeveloperCertificateTrust(trust: boolean): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withDeveloperCertificateTrust(trust)));
-    }
-
-    /** Sets the certificate trust scope */
-    withCertificateTrustScope(scope: CertificateTrustScope): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withCertificateTrustScope(scope)));
-    }
-
-    /** Configures HTTPS with a developer certificate */
-    withHttpsDeveloperCertificate(options?: WithHttpsDeveloperCertificateOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withHttpsDeveloperCertificate(options)));
-    }
-
-    /** Removes HTTPS certificate configuration */
-    withoutHttpsCertificate(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
-    }
-
-    /** Sets the parent relationship */
-    withParentRelationship(parent: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
-    }
-
-    /** Sets a child relationship */
-    withChildRelationship(child: ResourceBuilderBase): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withChildRelationship(child)));
-    }
-
-    /** Sets the icon for the resource */
-    withIconName(iconName: string, options?: WithIconNameOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withIconName(iconName, options)));
-    }
-
-    /** Adds an HTTP health probe to the resource */
-    withHttpProbe(probeType: ProbeType, options?: WithHttpProbeOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withHttpProbe(probeType, options)));
-    }
-
-    /** Excludes the resource from MCP server exposure */
-    excludeFromMcp(): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.excludeFromMcp()));
-    }
-
-    /** Sets the remote image name for publishing */
-    withRemoteImageName(remoteImageName: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withRemoteImageName(remoteImageName)));
-    }
-
-    /** Sets the remote image tag for publishing */
-    withRemoteImageTag(remoteImageTag: string): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withRemoteImageTag(remoteImageTag)));
-    }
-
-    /** Adds a pipeline step to the resource */
-    withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
-    }
-
-    /** Configures pipeline step dependencies via a callback */
-    withPipelineConfiguration(callback: (obj: PipelineConfigurationContext) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withPipelineConfiguration(callback)));
-    }
-
-    /** Adds a volume */
-    withVolume(target: string, options?: WithVolumeOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withVolume(target, options)));
-    }
-
-    /** Gets the resource name */
-    getResourceName(): Promise<string> {
-        return this._promise.then(obj => obj.getResourceName());
-    }
-
-    /** Subscribes to the BeforeResourceStarted event */
-    onBeforeResourceStarted(callback: (arg: BeforeResourceStartedEvent) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.onBeforeResourceStarted(callback)));
-    }
-
-    /** Subscribes to the ResourceStopped event */
-    onResourceStopped(callback: (arg: ResourceStoppedEvent) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.onResourceStopped(callback)));
-    }
-
-    /** Subscribes to the InitializeResource event */
-    onInitializeResource(callback: (arg: InitializeResourceEvent) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.onInitializeResource(callback)));
-    }
-
-    /** Subscribes to the ResourceEndpointsAllocated event */
-    onResourceEndpointsAllocated(callback: (arg: ResourceEndpointsAllocatedEvent) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.onResourceEndpointsAllocated(callback)));
-    }
-
-    /** Subscribes to the ResourceReady event */
-    onResourceReady(callback: (arg: ResourceReadyEvent) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
-    }
-
-    /** Sets the host port for the Aspire dashboard */
-    withHostPort(options?: WithHostPortOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withHostPort(options)));
-    }
-
-    /** Enables or disables forwarded headers support for the Aspire dashboard */
-    withForwardedHeaders(options?: WithForwardedHeadersOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.withForwardedHeaders(options)));
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
-    publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): DockerComposeAspireDashboardResourcePromise {
-        return new DockerComposeAspireDashboardResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
-    }
-
-}
-
-// ============================================================================
-// DockerComposeEnvironmentResource
-// ============================================================================
-
-export class DockerComposeEnvironmentResource extends ResourceBuilderBase<DockerComposeEnvironmentResourceHandle> {
-    constructor(handle: DockerComposeEnvironmentResourceHandle, client: AspireClientRpc) {
-        super(handle, client);
-    }
-
-    /** Gets the DefaultNetworkName property */
-    defaultNetworkName = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker/DockerComposeEnvironmentResource.defaultNetworkName',
-                { context: this._handle }
-            );
-        },
-        set: async (value: string): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker/DockerComposeEnvironmentResource.setDefaultNetworkName',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the DashboardEnabled property */
-    dashboardEnabled = {
-        get: async (): Promise<boolean> => {
-            return await this._client.invokeCapability<boolean>(
-                'Aspire.Hosting.Docker/DockerComposeEnvironmentResource.dashboardEnabled',
-                { context: this._handle }
-            );
-        },
-        set: async (value: boolean): Promise<void> => {
-            await this._client.invokeCapability<void>(
-                'Aspire.Hosting.Docker/DockerComposeEnvironmentResource.setDashboardEnabled',
-                { context: this._handle, value }
-            );
-        }
-    };
-
-    /** Gets the Name property */
-    name = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker/DockerComposeEnvironmentResource.name',
-                { context: this._handle }
-            );
-        },
-    };
-
-    /** @internal */
-    private async _withContainerRegistryInternal(registry: ResourceBuilderBase): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, registry };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withContainerRegistry',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Configures a resource to use a container registry */
-    withContainerRegistry(registry: ResourceBuilderBase): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._withContainerRegistryInternal(registry));
-    }
-
-    /** @internal */
-    private async _withDockerfileBaseImageInternal(buildImage?: string, runtimeImage?: string): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (buildImage !== undefined) rpcArgs.buildImage = buildImage;
-        if (runtimeImage !== undefined) rpcArgs.runtimeImage = runtimeImage;
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withDockerfileBaseImage',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Sets the base image for a Dockerfile build */
-    withDockerfileBaseImage(options?: WithDockerfileBaseImageOptions): DockerComposeEnvironmentResourcePromise {
-        const buildImage = options?.buildImage;
-        const runtimeImage = options?.runtimeImage;
-        return new DockerComposeEnvironmentResourcePromise(this._withDockerfileBaseImageInternal(buildImage, runtimeImage));
-    }
-
-    /** @internal */
-    private async _withRequiredCommandInternal(command: string, helpLink?: string): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, command };
-        if (helpLink !== undefined) rpcArgs.helpLink = helpLink;
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withRequiredCommand',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Adds a required command dependency */
-    withRequiredCommand(command: string, options?: WithRequiredCommandOptions): DockerComposeEnvironmentResourcePromise {
-        const helpLink = options?.helpLink;
-        return new DockerComposeEnvironmentResourcePromise(this._withRequiredCommandInternal(command, helpLink));
-    }
-
-    /** @internal */
-    private async _withUrlsCallbackInternal(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): Promise<DockerComposeEnvironmentResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as ResourceUrlsCallbackContextHandle;
-            const obj = new ResourceUrlsCallbackContext(objHandle, this._client);
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withUrlsCallback',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Customizes displayed URLs via callback */
-    withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._withUrlsCallbackInternal(callback));
-    }
-
-    /** @internal */
-    private async _withUrlInternal(url: string, displayText?: string): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
-        if (displayText !== undefined) rpcArgs.displayText = displayText;
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withUrl',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Adds or modifies displayed URLs */
-    withUrl(url: string, options?: WithUrlOptions): DockerComposeEnvironmentResourcePromise {
-        const displayText = options?.displayText;
-        return new DockerComposeEnvironmentResourcePromise(this._withUrlInternal(url, displayText));
-    }
-
-    /** @internal */
-    private async _withUrlExpressionInternal(url: ReferenceExpression, displayText?: string): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
-        if (displayText !== undefined) rpcArgs.displayText = displayText;
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withUrlExpression',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Adds a URL using a reference expression */
-    withUrlExpression(url: ReferenceExpression, options?: WithUrlExpressionOptions): DockerComposeEnvironmentResourcePromise {
-        const displayText = options?.displayText;
-        return new DockerComposeEnvironmentResourcePromise(this._withUrlExpressionInternal(url, displayText));
-    }
-
-    /** @internal */
-    private async _withUrlForEndpointInternal(endpointName: string, callback: (obj: ResourceUrlAnnotation) => Promise<void>): Promise<DockerComposeEnvironmentResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const obj = wrapIfHandle(objData) as ResourceUrlAnnotation;
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, endpointName, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withUrlForEndpoint',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Customizes the URL for a specific endpoint via callback */
-    withUrlForEndpoint(endpointName: string, callback: (obj: ResourceUrlAnnotation) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._withUrlForEndpointInternal(endpointName, callback));
-    }
-
-    /** @internal */
-    private async _excludeFromManifestInternal(): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/excludeFromManifest',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Excludes the resource from the deployment manifest */
-    excludeFromManifest(): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._excludeFromManifestInternal());
-    }
-
-    /** @internal */
-    private async _withExplicitStartInternal(): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withExplicitStart',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Prevents resource from starting automatically */
-    withExplicitStart(): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._withExplicitStartInternal());
-    }
-
-    /** @internal */
-    private async _withHealthCheckInternal(key: string): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, key };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withHealthCheck',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Adds a health check by key */
-    withHealthCheck(key: string): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._withHealthCheckInternal(key));
-    }
-
-    /** @internal */
-    private async _withCommandInternal(name: string, displayName: string, executeCommand: (arg: ExecuteCommandContext) => Promise<ExecuteCommandResult>, commandOptions?: CommandOptions): Promise<DockerComposeEnvironmentResource> {
-        const executeCommandId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as ExecuteCommandContextHandle;
-            const arg = new ExecuteCommandContext(argHandle, this._client);
-            return await executeCommand(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, displayName, executeCommand: executeCommandId };
-        if (commandOptions !== undefined) rpcArgs.commandOptions = commandOptions;
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withCommand',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Adds a resource command */
-    withCommand(name: string, displayName: string, executeCommand: (arg: ExecuteCommandContext) => Promise<ExecuteCommandResult>, options?: WithCommandOptions): DockerComposeEnvironmentResourcePromise {
-        const commandOptions = options?.commandOptions;
-        return new DockerComposeEnvironmentResourcePromise(this._withCommandInternal(name, displayName, executeCommand, commandOptions));
-    }
-
-    /** @internal */
-    private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Sets the parent relationship */
-    withParentRelationship(parent: ResourceBuilderBase): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._withParentRelationshipInternal(parent));
-    }
-
-    /** @internal */
-    private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Sets a child relationship */
-    withChildRelationship(child: ResourceBuilderBase): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._withChildRelationshipInternal(child));
-    }
-
-    /** @internal */
-    private async _withIconNameInternal(iconName: string, iconVariant?: IconVariant): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, iconName };
-        if (iconVariant !== undefined) rpcArgs.iconVariant = iconVariant;
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withIconName',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Sets the icon for the resource */
-    withIconName(iconName: string, options?: WithIconNameOptions): DockerComposeEnvironmentResourcePromise {
-        const iconVariant = options?.iconVariant;
-        return new DockerComposeEnvironmentResourcePromise(this._withIconNameInternal(iconName, iconVariant));
-    }
-
-    /** @internal */
-    private async _excludeFromMcpInternal(): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/excludeFromMcp',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Excludes the resource from MCP server exposure */
-    excludeFromMcp(): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._excludeFromMcpInternal());
-    }
-
-    /** @internal */
-    private async _withPipelineStepFactoryInternal(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, dependsOn?: string[], requiredBy?: string[], tags?: string[], description?: string): Promise<DockerComposeEnvironmentResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as PipelineStepContextHandle;
-            const arg = new PipelineStepContext(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, stepName, callback: callbackId };
-        if (dependsOn !== undefined) rpcArgs.dependsOn = dependsOn;
-        if (requiredBy !== undefined) rpcArgs.requiredBy = requiredBy;
-        if (tags !== undefined) rpcArgs.tags = tags;
-        if (description !== undefined) rpcArgs.description = description;
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withPipelineStepFactory',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Adds a pipeline step to the resource */
-    withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): DockerComposeEnvironmentResourcePromise {
-        const dependsOn = options?.dependsOn;
-        const requiredBy = options?.requiredBy;
-        const tags = options?.tags;
-        const description = options?.description;
-        return new DockerComposeEnvironmentResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
-    }
-
-    /** @internal */
-    private async _withPipelineConfigurationInternal(callback: (obj: PipelineConfigurationContext) => Promise<void>): Promise<DockerComposeEnvironmentResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as PipelineConfigurationContextHandle;
-            const obj = new PipelineConfigurationContext(objHandle, this._client);
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/withPipelineConfiguration',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Configures pipeline step dependencies via a callback */
-    withPipelineConfiguration(callback: (obj: PipelineConfigurationContext) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._withPipelineConfigurationInternal(callback));
-    }
-
-    /** Gets the resource name */
-    async getResourceName(): Promise<string> {
-        const rpcArgs: Record<string, unknown> = { resource: this._handle };
-        return await this._client.invokeCapability<string>(
-            'Aspire.Hosting/getResourceName',
-            rpcArgs
-        );
-    }
-
-    /** @internal */
-    private async _onBeforeResourceStartedInternal(callback: (arg: BeforeResourceStartedEvent) => Promise<void>): Promise<DockerComposeEnvironmentResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as BeforeResourceStartedEventHandle;
-            const arg = new BeforeResourceStartedEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/onBeforeResourceStarted',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Subscribes to the BeforeResourceStarted event */
-    onBeforeResourceStarted(callback: (arg: BeforeResourceStartedEvent) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._onBeforeResourceStartedInternal(callback));
-    }
-
-    /** @internal */
-    private async _onResourceStoppedInternal(callback: (arg: ResourceStoppedEvent) => Promise<void>): Promise<DockerComposeEnvironmentResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as ResourceStoppedEventHandle;
-            const arg = new ResourceStoppedEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/onResourceStopped',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Subscribes to the ResourceStopped event */
-    onResourceStopped(callback: (arg: ResourceStoppedEvent) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._onResourceStoppedInternal(callback));
-    }
-
-    /** @internal */
-    private async _onInitializeResourceInternal(callback: (arg: InitializeResourceEvent) => Promise<void>): Promise<DockerComposeEnvironmentResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as InitializeResourceEventHandle;
-            const arg = new InitializeResourceEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/onInitializeResource',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Subscribes to the InitializeResource event */
-    onInitializeResource(callback: (arg: InitializeResourceEvent) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._onInitializeResourceInternal(callback));
-    }
-
-    /** @internal */
-    private async _onResourceReadyInternal(callback: (arg: ResourceReadyEvent) => Promise<void>): Promise<DockerComposeEnvironmentResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as ResourceReadyEventHandle;
-            const arg = new ResourceReadyEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting/onResourceReady',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Subscribes to the ResourceReady event */
-    onResourceReady(callback: (arg: ResourceReadyEvent) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._onResourceReadyInternal(callback));
-    }
-
-    /** @internal */
-    private async _withPropertiesInternal(configure: (obj: DockerComposeEnvironmentResource) => Promise<void>): Promise<DockerComposeEnvironmentResource> {
-        const configureId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as DockerComposeEnvironmentResourceHandle;
-            const obj = new DockerComposeEnvironmentResource(objHandle, this._client);
-            await configure(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting.Docker/withProperties',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Configures properties of the Docker Compose environment */
-    withProperties(configure: (obj: DockerComposeEnvironmentResource) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._withPropertiesInternal(configure));
-    }
-
-    /** @internal */
-    private async _withDashboardInternal(enabled?: boolean): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (enabled !== undefined) rpcArgs.enabled = enabled;
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting.Docker/withDashboard',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Enables or disables the Aspire dashboard for the Docker Compose environment */
-    withDashboard(options?: WithDashboardOptions): DockerComposeEnvironmentResourcePromise {
-        const enabled = options?.enabled;
-        return new DockerComposeEnvironmentResourcePromise(this._withDashboardInternal(enabled));
-    }
-
-    /** @internal */
-    private async _configureDashboardInternal(configure: (obj: DockerComposeAspireDashboardResource) => Promise<void>): Promise<DockerComposeEnvironmentResource> {
-        const configureId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as DockerComposeAspireDashboardResourceHandle;
-            const obj = new DockerComposeAspireDashboardResource(objHandle, this._client);
-            await configure(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Aspire.Hosting.Docker/configureDashboard',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Configures the Aspire dashboard resource for the Docker Compose environment */
-    configureDashboard(configure: (obj: DockerComposeAspireDashboardResource) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._configureDashboardInternal(configure));
-    }
-
-    /** @internal */
-    private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokploy',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy */
-    publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<DockerComposeEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new DockerComposeEnvironmentResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
-    }
-
-}
-
-/**
- * Thenable wrapper for DockerComposeEnvironmentResource that enables fluent chaining.
- * @example
- * await builder.addSomething().withX().withY();
- */
-export class DockerComposeEnvironmentResourcePromise implements PromiseLike<DockerComposeEnvironmentResource> {
-    constructor(private _promise: Promise<DockerComposeEnvironmentResource>) {}
-
-    then<TResult1 = DockerComposeEnvironmentResource, TResult2 = never>(
-        onfulfilled?: ((value: DockerComposeEnvironmentResource) => TResult1 | PromiseLike<TResult1>) | null,
-        onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
-    ): PromiseLike<TResult1 | TResult2> {
-        return this._promise.then(onfulfilled, onrejected);
-    }
-
-    /** Configures a resource to use a container registry */
-    withContainerRegistry(registry: ResourceBuilderBase): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withContainerRegistry(registry)));
-    }
-
-    /** Sets the base image for a Dockerfile build */
-    withDockerfileBaseImage(options?: WithDockerfileBaseImageOptions): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withDockerfileBaseImage(options)));
-    }
-
-    /** Adds a required command dependency */
-    withRequiredCommand(command: string, options?: WithRequiredCommandOptions): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
-    }
-
-    /** Customizes displayed URLs via callback */
-    withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
-    }
-
-    /** Adds or modifies displayed URLs */
-    withUrl(url: string, options?: WithUrlOptions): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withUrl(url, options)));
-    }
-
-    /** Adds a URL using a reference expression */
-    withUrlExpression(url: ReferenceExpression, options?: WithUrlExpressionOptions): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withUrlExpression(url, options)));
-    }
-
-    /** Customizes the URL for a specific endpoint via callback */
-    withUrlForEndpoint(endpointName: string, callback: (obj: ResourceUrlAnnotation) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withUrlForEndpoint(endpointName, callback)));
-    }
-
-    /** Excludes the resource from the deployment manifest */
-    excludeFromManifest(): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.excludeFromManifest()));
-    }
-
-    /** Prevents resource from starting automatically */
-    withExplicitStart(): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withExplicitStart()));
-    }
-
-    /** Adds a health check by key */
-    withHealthCheck(key: string): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withHealthCheck(key)));
-    }
-
-    /** Adds a resource command */
-    withCommand(name: string, displayName: string, executeCommand: (arg: ExecuteCommandContext) => Promise<ExecuteCommandResult>, options?: WithCommandOptions): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withCommand(name, displayName, executeCommand, options)));
-    }
-
-    /** Sets the parent relationship */
-    withParentRelationship(parent: ResourceBuilderBase): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
-    }
-
-    /** Sets a child relationship */
-    withChildRelationship(child: ResourceBuilderBase): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withChildRelationship(child)));
-    }
-
-    /** Sets the icon for the resource */
-    withIconName(iconName: string, options?: WithIconNameOptions): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withIconName(iconName, options)));
-    }
-
-    /** Excludes the resource from MCP server exposure */
-    excludeFromMcp(): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.excludeFromMcp()));
-    }
-
-    /** Adds a pipeline step to the resource */
-    withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
-    }
-
-    /** Configures pipeline step dependencies via a callback */
-    withPipelineConfiguration(callback: (obj: PipelineConfigurationContext) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withPipelineConfiguration(callback)));
-    }
-
-    /** Gets the resource name */
-    getResourceName(): Promise<string> {
-        return this._promise.then(obj => obj.getResourceName());
-    }
-
-    /** Subscribes to the BeforeResourceStarted event */
-    onBeforeResourceStarted(callback: (arg: BeforeResourceStartedEvent) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.onBeforeResourceStarted(callback)));
-    }
-
-    /** Subscribes to the ResourceStopped event */
-    onResourceStopped(callback: (arg: ResourceStoppedEvent) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.onResourceStopped(callback)));
-    }
-
-    /** Subscribes to the InitializeResource event */
-    onInitializeResource(callback: (arg: InitializeResourceEvent) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.onInitializeResource(callback)));
-    }
-
-    /** Subscribes to the ResourceReady event */
-    onResourceReady(callback: (arg: ResourceReadyEvent) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
-    }
-
-    /** Configures properties of the Docker Compose environment */
-    withProperties(configure: (obj: DockerComposeEnvironmentResource) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withProperties(configure)));
-    }
-
-    /** Enables or disables the Aspire dashboard for the Docker Compose environment */
-    withDashboard(options?: WithDashboardOptions): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.withDashboard(options)));
-    }
-
-    /** Configures the Aspire dashboard resource for the Docker Compose environment */
-    configureDashboard(configure: (obj: DockerComposeAspireDashboardResource) => Promise<void>): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.configureDashboard(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
-    publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): DockerComposeEnvironmentResourcePromise {
-        return new DockerComposeEnvironmentResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
-    }
-
-}
-
-// ============================================================================
-// DockerComposeServiceResource
-// ============================================================================
-
-export class DockerComposeServiceResource extends ResourceBuilderBase<DockerComposeServiceResourceHandle> {
-    constructor(handle: DockerComposeServiceResourceHandle, client: AspireClientRpc) {
-        super(handle, client);
-    }
-
-    /** Gets the Parent property */
-    parent = {
-        get: async (): Promise<DockerComposeEnvironmentResource> => {
-            const handle = await this._client.invokeCapability<DockerComposeEnvironmentResourceHandle>(
-                'Aspire.Hosting.Docker/DockerComposeServiceResource.parent',
-                { context: this._handle }
-            );
-            return new DockerComposeEnvironmentResource(handle, this._client);
-        },
-    };
-
-    /** Gets the Name property */
-    name = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Aspire.Hosting.Docker/DockerComposeServiceResource.name',
-                { context: this._handle }
-            );
-        },
-    };
-
-    /** @internal */
-    private async _withContainerRegistryInternal(registry: ResourceBuilderBase): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, registry };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withContainerRegistry',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Configures a resource to use a container registry */
-    withContainerRegistry(registry: ResourceBuilderBase): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._withContainerRegistryInternal(registry));
-    }
-
-    /** @internal */
-    private async _withDockerfileBaseImageInternal(buildImage?: string, runtimeImage?: string): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        if (buildImage !== undefined) rpcArgs.buildImage = buildImage;
-        if (runtimeImage !== undefined) rpcArgs.runtimeImage = runtimeImage;
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withDockerfileBaseImage',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Sets the base image for a Dockerfile build */
-    withDockerfileBaseImage(options?: WithDockerfileBaseImageOptions): DockerComposeServiceResourcePromise {
-        const buildImage = options?.buildImage;
-        const runtimeImage = options?.runtimeImage;
-        return new DockerComposeServiceResourcePromise(this._withDockerfileBaseImageInternal(buildImage, runtimeImage));
-    }
-
-    /** @internal */
-    private async _withRequiredCommandInternal(command: string, helpLink?: string): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, command };
-        if (helpLink !== undefined) rpcArgs.helpLink = helpLink;
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withRequiredCommand',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Adds a required command dependency */
-    withRequiredCommand(command: string, options?: WithRequiredCommandOptions): DockerComposeServiceResourcePromise {
-        const helpLink = options?.helpLink;
-        return new DockerComposeServiceResourcePromise(this._withRequiredCommandInternal(command, helpLink));
-    }
-
-    /** @internal */
-    private async _withUrlsCallbackInternal(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): Promise<DockerComposeServiceResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as ResourceUrlsCallbackContextHandle;
-            const obj = new ResourceUrlsCallbackContext(objHandle, this._client);
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withUrlsCallback',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Customizes displayed URLs via callback */
-    withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._withUrlsCallbackInternal(callback));
-    }
-
-    /** @internal */
-    private async _withUrlInternal(url: string, displayText?: string): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
-        if (displayText !== undefined) rpcArgs.displayText = displayText;
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withUrl',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Adds or modifies displayed URLs */
-    withUrl(url: string, options?: WithUrlOptions): DockerComposeServiceResourcePromise {
-        const displayText = options?.displayText;
-        return new DockerComposeServiceResourcePromise(this._withUrlInternal(url, displayText));
-    }
-
-    /** @internal */
-    private async _withUrlExpressionInternal(url: ReferenceExpression, displayText?: string): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
-        if (displayText !== undefined) rpcArgs.displayText = displayText;
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withUrlExpression',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Adds a URL using a reference expression */
-    withUrlExpression(url: ReferenceExpression, options?: WithUrlExpressionOptions): DockerComposeServiceResourcePromise {
-        const displayText = options?.displayText;
-        return new DockerComposeServiceResourcePromise(this._withUrlExpressionInternal(url, displayText));
-    }
-
-    /** @internal */
-    private async _withUrlForEndpointInternal(endpointName: string, callback: (obj: ResourceUrlAnnotation) => Promise<void>): Promise<DockerComposeServiceResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const obj = wrapIfHandle(objData) as ResourceUrlAnnotation;
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, endpointName, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withUrlForEndpoint',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Customizes the URL for a specific endpoint via callback */
-    withUrlForEndpoint(endpointName: string, callback: (obj: ResourceUrlAnnotation) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._withUrlForEndpointInternal(endpointName, callback));
-    }
-
-    /** @internal */
-    private async _excludeFromManifestInternal(): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/excludeFromManifest',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Excludes the resource from the deployment manifest */
-    excludeFromManifest(): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._excludeFromManifestInternal());
-    }
-
-    /** @internal */
-    private async _withExplicitStartInternal(): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withExplicitStart',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Prevents resource from starting automatically */
-    withExplicitStart(): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._withExplicitStartInternal());
-    }
-
-    /** @internal */
-    private async _withHealthCheckInternal(key: string): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, key };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withHealthCheck',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Adds a health check by key */
-    withHealthCheck(key: string): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._withHealthCheckInternal(key));
-    }
-
-    /** @internal */
-    private async _withCommandInternal(name: string, displayName: string, executeCommand: (arg: ExecuteCommandContext) => Promise<ExecuteCommandResult>, commandOptions?: CommandOptions): Promise<DockerComposeServiceResource> {
-        const executeCommandId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as ExecuteCommandContextHandle;
-            const arg = new ExecuteCommandContext(argHandle, this._client);
-            return await executeCommand(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, displayName, executeCommand: executeCommandId };
-        if (commandOptions !== undefined) rpcArgs.commandOptions = commandOptions;
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withCommand',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Adds a resource command */
-    withCommand(name: string, displayName: string, executeCommand: (arg: ExecuteCommandContext) => Promise<ExecuteCommandResult>, options?: WithCommandOptions): DockerComposeServiceResourcePromise {
-        const commandOptions = options?.commandOptions;
-        return new DockerComposeServiceResourcePromise(this._withCommandInternal(name, displayName, executeCommand, commandOptions));
-    }
-
-    /** @internal */
-    private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Sets the parent relationship */
-    withParentRelationship(parent: ResourceBuilderBase): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._withParentRelationshipInternal(parent));
-    }
-
-    /** @internal */
-    private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Sets a child relationship */
-    withChildRelationship(child: ResourceBuilderBase): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._withChildRelationshipInternal(child));
-    }
-
-    /** @internal */
-    private async _withIconNameInternal(iconName: string, iconVariant?: IconVariant): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, iconName };
-        if (iconVariant !== undefined) rpcArgs.iconVariant = iconVariant;
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withIconName',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Sets the icon for the resource */
-    withIconName(iconName: string, options?: WithIconNameOptions): DockerComposeServiceResourcePromise {
-        const iconVariant = options?.iconVariant;
-        return new DockerComposeServiceResourcePromise(this._withIconNameInternal(iconName, iconVariant));
-    }
-
-    /** @internal */
-    private async _excludeFromMcpInternal(): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/excludeFromMcp',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Excludes the resource from MCP server exposure */
-    excludeFromMcp(): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._excludeFromMcpInternal());
-    }
-
-    /** @internal */
-    private async _withPipelineStepFactoryInternal(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, dependsOn?: string[], requiredBy?: string[], tags?: string[], description?: string): Promise<DockerComposeServiceResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as PipelineStepContextHandle;
-            const arg = new PipelineStepContext(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, stepName, callback: callbackId };
-        if (dependsOn !== undefined) rpcArgs.dependsOn = dependsOn;
-        if (requiredBy !== undefined) rpcArgs.requiredBy = requiredBy;
-        if (tags !== undefined) rpcArgs.tags = tags;
-        if (description !== undefined) rpcArgs.description = description;
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withPipelineStepFactory',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Adds a pipeline step to the resource */
-    withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): DockerComposeServiceResourcePromise {
-        const dependsOn = options?.dependsOn;
-        const requiredBy = options?.requiredBy;
-        const tags = options?.tags;
-        const description = options?.description;
-        return new DockerComposeServiceResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
-    }
-
-    /** @internal */
-    private async _withPipelineConfigurationInternal(callback: (obj: PipelineConfigurationContext) => Promise<void>): Promise<DockerComposeServiceResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as PipelineConfigurationContextHandle;
-            const obj = new PipelineConfigurationContext(objHandle, this._client);
-            await callback(obj);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/withPipelineConfiguration',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Configures pipeline step dependencies via a callback */
-    withPipelineConfiguration(callback: (obj: PipelineConfigurationContext) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._withPipelineConfigurationInternal(callback));
-    }
-
-    /** Gets the resource name */
-    async getResourceName(): Promise<string> {
-        const rpcArgs: Record<string, unknown> = { resource: this._handle };
-        return await this._client.invokeCapability<string>(
-            'Aspire.Hosting/getResourceName',
-            rpcArgs
-        );
-    }
-
-    /** @internal */
-    private async _onBeforeResourceStartedInternal(callback: (arg: BeforeResourceStartedEvent) => Promise<void>): Promise<DockerComposeServiceResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as BeforeResourceStartedEventHandle;
-            const arg = new BeforeResourceStartedEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/onBeforeResourceStarted',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Subscribes to the BeforeResourceStarted event */
-    onBeforeResourceStarted(callback: (arg: BeforeResourceStartedEvent) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._onBeforeResourceStartedInternal(callback));
-    }
-
-    /** @internal */
-    private async _onResourceStoppedInternal(callback: (arg: ResourceStoppedEvent) => Promise<void>): Promise<DockerComposeServiceResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as ResourceStoppedEventHandle;
-            const arg = new ResourceStoppedEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/onResourceStopped',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Subscribes to the ResourceStopped event */
-    onResourceStopped(callback: (arg: ResourceStoppedEvent) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._onResourceStoppedInternal(callback));
-    }
-
-    /** @internal */
-    private async _onInitializeResourceInternal(callback: (arg: InitializeResourceEvent) => Promise<void>): Promise<DockerComposeServiceResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as InitializeResourceEventHandle;
-            const arg = new InitializeResourceEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/onInitializeResource',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Subscribes to the InitializeResource event */
-    onInitializeResource(callback: (arg: InitializeResourceEvent) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._onInitializeResourceInternal(callback));
-    }
-
-    /** @internal */
-    private async _onResourceReadyInternal(callback: (arg: ResourceReadyEvent) => Promise<void>): Promise<DockerComposeServiceResource> {
-        const callbackId = registerCallback(async (argData: unknown) => {
-            const argHandle = wrapIfHandle(argData) as ResourceReadyEventHandle;
-            const arg = new ResourceReadyEvent(argHandle, this._client);
-            await callback(arg);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Aspire.Hosting/onResourceReady',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Subscribes to the ResourceReady event */
-    onResourceReady(callback: (arg: ResourceReadyEvent) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._onResourceReadyInternal(callback));
-    }
-
-    /** @internal */
-    private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokploy',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy */
-    publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<DockerComposeServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<DockerComposeServiceResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new DockerComposeServiceResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
-    }
-
-}
-
-/**
- * Thenable wrapper for DockerComposeServiceResource that enables fluent chaining.
- * @example
- * await builder.addSomething().withX().withY();
- */
-export class DockerComposeServiceResourcePromise implements PromiseLike<DockerComposeServiceResource> {
-    constructor(private _promise: Promise<DockerComposeServiceResource>) {}
-
-    then<TResult1 = DockerComposeServiceResource, TResult2 = never>(
-        onfulfilled?: ((value: DockerComposeServiceResource) => TResult1 | PromiseLike<TResult1>) | null,
-        onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
-    ): PromiseLike<TResult1 | TResult2> {
-        return this._promise.then(onfulfilled, onrejected);
-    }
-
-    /** Configures a resource to use a container registry */
-    withContainerRegistry(registry: ResourceBuilderBase): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withContainerRegistry(registry)));
-    }
-
-    /** Sets the base image for a Dockerfile build */
-    withDockerfileBaseImage(options?: WithDockerfileBaseImageOptions): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withDockerfileBaseImage(options)));
-    }
-
-    /** Adds a required command dependency */
-    withRequiredCommand(command: string, options?: WithRequiredCommandOptions): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
-    }
-
-    /** Customizes displayed URLs via callback */
-    withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
-    }
-
-    /** Adds or modifies displayed URLs */
-    withUrl(url: string, options?: WithUrlOptions): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withUrl(url, options)));
-    }
-
-    /** Adds a URL using a reference expression */
-    withUrlExpression(url: ReferenceExpression, options?: WithUrlExpressionOptions): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withUrlExpression(url, options)));
-    }
-
-    /** Customizes the URL for a specific endpoint via callback */
-    withUrlForEndpoint(endpointName: string, callback: (obj: ResourceUrlAnnotation) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withUrlForEndpoint(endpointName, callback)));
-    }
-
-    /** Excludes the resource from the deployment manifest */
-    excludeFromManifest(): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.excludeFromManifest()));
-    }
-
-    /** Prevents resource from starting automatically */
-    withExplicitStart(): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withExplicitStart()));
-    }
-
-    /** Adds a health check by key */
-    withHealthCheck(key: string): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withHealthCheck(key)));
-    }
-
-    /** Adds a resource command */
-    withCommand(name: string, displayName: string, executeCommand: (arg: ExecuteCommandContext) => Promise<ExecuteCommandResult>, options?: WithCommandOptions): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withCommand(name, displayName, executeCommand, options)));
-    }
-
-    /** Sets the parent relationship */
-    withParentRelationship(parent: ResourceBuilderBase): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
-    }
-
-    /** Sets a child relationship */
-    withChildRelationship(child: ResourceBuilderBase): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withChildRelationship(child)));
-    }
-
-    /** Sets the icon for the resource */
-    withIconName(iconName: string, options?: WithIconNameOptions): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withIconName(iconName, options)));
-    }
-
-    /** Excludes the resource from MCP server exposure */
-    excludeFromMcp(): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.excludeFromMcp()));
-    }
-
-    /** Adds a pipeline step to the resource */
-    withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
-    }
-
-    /** Configures pipeline step dependencies via a callback */
-    withPipelineConfiguration(callback: (obj: PipelineConfigurationContext) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.withPipelineConfiguration(callback)));
-    }
-
-    /** Gets the resource name */
-    getResourceName(): Promise<string> {
-        return this._promise.then(obj => obj.getResourceName());
-    }
-
-    /** Subscribes to the BeforeResourceStarted event */
-    onBeforeResourceStarted(callback: (arg: BeforeResourceStartedEvent) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.onBeforeResourceStarted(callback)));
-    }
-
-    /** Subscribes to the ResourceStopped event */
-    onResourceStopped(callback: (arg: ResourceStoppedEvent) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.onResourceStopped(callback)));
-    }
-
-    /** Subscribes to the InitializeResource event */
-    onInitializeResource(callback: (arg: InitializeResourceEvent) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.onInitializeResource(callback)));
-    }
-
-    /** Subscribes to the ResourceReady event */
-    onResourceReady(callback: (arg: ResourceReadyEvent) => Promise<void>): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
-    publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): DockerComposeServiceResourcePromise {
-        return new DockerComposeServiceResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -12785,26 +9239,6 @@ export class DokployProjectEnvironmentResource extends ResourceBuilderBase<Dokpl
     constructor(handle: DokployProjectEnvironmentResourceHandle, client: AspireClientRpc) {
         super(handle, client);
     }
-
-    /** Gets the Endpoint property */
-    endpoint = {
-        get: async (): Promise<ReferenceExpression> => {
-            return await this._client.invokeCapability<ReferenceExpression>(
-                'Ridder.Hosting.Dokploy/DokployProjectEnvironmentResource.endpoint',
-                { context: this._handle }
-            );
-        },
-    };
-
-    /** Gets the Name property */
-    name = {
-        get: async (): Promise<string> => {
-            return await this._client.invokeCapability<string>(
-                'Ridder.Hosting.Dokploy/DokployProjectEnvironmentResource.name',
-                { context: this._handle }
-            );
-        },
-    };
 
     /** @internal */
     private async _withContainerRegistryInternal(registry: ResourceBuilderBase): Promise<DokployProjectEnvironmentResource> {
@@ -12875,6 +9309,26 @@ export class DokployProjectEnvironmentResource extends ResourceBuilderBase<Dokpl
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._withUrlsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<DokployProjectEnvironmentResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<DokployProjectEnvironmentResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new DokployProjectEnvironmentResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): DokployProjectEnvironmentResourcePromise {
+        return new DokployProjectEnvironmentResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
     }
 
     /** @internal */
@@ -12998,10 +9452,25 @@ export class DokployProjectEnvironmentResource extends ResourceBuilderBase<Dokpl
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<DokployProjectEnvironmentResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<DokployProjectEnvironmentResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new DokployProjectEnvironmentResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): DokployProjectEnvironmentResourcePromise {
+        return new DokployProjectEnvironmentResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<DokployProjectEnvironmentResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<DokployProjectEnvironmentResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new DokployProjectEnvironmentResource(result, this._client);
@@ -13016,7 +9485,7 @@ export class DokployProjectEnvironmentResource extends ResourceBuilderBase<Dokpl
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<DokployProjectEnvironmentResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<DokployProjectEnvironmentResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new DokployProjectEnvironmentResource(result, this._client);
@@ -13085,6 +9554,26 @@ export class DokployProjectEnvironmentResource extends ResourceBuilderBase<Dokpl
         const tags = options?.tags;
         const description = options?.description;
         return new DokployProjectEnvironmentResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<DokployProjectEnvironmentResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<DokployProjectEnvironmentResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new DokployProjectEnvironmentResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): DokployProjectEnvironmentResourcePromise {
+        return new DokployProjectEnvironmentResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -13206,24 +9695,8 @@ export class DokployProjectEnvironmentResource extends ResourceBuilderBase<Dokpl
         return new DokployProjectEnvironmentResource(result, this._client);
     }
 
-    /** Configures a Dokploy-hosted container registry */
     withSelfHostedRegistry(): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._withSelfHostedRegistryInternal());
-    }
-
-    /** @internal */
-    private async _withSelfHostedRegistryDomainInternal(registryDomainUrl: string): Promise<DokployProjectEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, registryDomainUrl };
-        const result = await this._client.invokeCapability<DokployProjectEnvironmentResourceHandle>(
-            'Ridder.Hosting.Dokploy/withSelfHostedRegistryDomain',
-            rpcArgs
-        );
-        return new DokployProjectEnvironmentResource(result, this._client);
-    }
-
-    /** Configures a Dokploy-hosted registry with explicit domain */
-    withSelfHostedRegistryDomain(registryDomainUrl: string): DokployProjectEnvironmentResourcePromise {
-        return new DokployProjectEnvironmentResourcePromise(this._withSelfHostedRegistryDomainInternal(registryDomainUrl));
     }
 
     /** @internal */
@@ -13236,24 +9709,8 @@ export class DokployProjectEnvironmentResource extends ResourceBuilderBase<Dokpl
         return new DokployProjectEnvironmentResource(result, this._client);
     }
 
-    /** Configures an external hosted container registry */
     withHostedRegistry(): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._withHostedRegistryInternal());
-    }
-
-    /** @internal */
-    private async _withHostedRegistryCredentialsInternal(registryUrl: string, username: string, password: string): Promise<DokployProjectEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, registryUrl, username, password };
-        const result = await this._client.invokeCapability<DokployProjectEnvironmentResourceHandle>(
-            'Ridder.Hosting.Dokploy/withHostedRegistryCredentials',
-            rpcArgs
-        );
-        return new DokployProjectEnvironmentResource(result, this._client);
-    }
-
-    /** Configures an external hosted registry with explicit credentials */
-    withHostedRegistryCredentials(registryUrl: string, username: string, password: string): DokployProjectEnvironmentResourcePromise {
-        return new DokployProjectEnvironmentResourcePromise(this._withHostedRegistryCredentialsInternal(registryUrl, username, password));
     }
 
     /** @internal */
@@ -13266,24 +9723,8 @@ export class DokployProjectEnvironmentResource extends ResourceBuilderBase<Dokpl
         return new DokployProjectEnvironmentResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<DokployProjectEnvironmentResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<DokployProjectEnvironmentResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new DokployProjectEnvironmentResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): DokployProjectEnvironmentResourcePromise {
-        return new DokployProjectEnvironmentResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -13323,6 +9764,11 @@ export class DokployProjectEnvironmentResourcePromise implements PromiseLike<Dok
         return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
     }
 
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): DokployProjectEnvironmentResourcePromise {
+        return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
+    }
+
     /** Adds or modifies displayed URLs */
     withUrl(url: string, options?: WithUrlOptions): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withUrl(url, options)));
@@ -13358,6 +9804,11 @@ export class DokployProjectEnvironmentResourcePromise implements PromiseLike<Dok
         return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withCommand(name, displayName, executeCommand, options)));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): DokployProjectEnvironmentResourcePromise {
+        return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -13381,6 +9832,11 @@ export class DokployProjectEnvironmentResourcePromise implements PromiseLike<Dok
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): DokployProjectEnvironmentResourcePromise {
+        return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -13413,34 +9869,16 @@ export class DokployProjectEnvironmentResourcePromise implements PromiseLike<Dok
         return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Configures a Dokploy-hosted container registry */
     withSelfHostedRegistry(): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withSelfHostedRegistry()));
     }
 
-    /** Configures a Dokploy-hosted registry with explicit domain */
-    withSelfHostedRegistryDomain(registryDomainUrl: string): DokployProjectEnvironmentResourcePromise {
-        return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withSelfHostedRegistryDomain(registryDomainUrl)));
-    }
-
-    /** Configures an external hosted container registry */
     withHostedRegistry(): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withHostedRegistry()));
     }
 
-    /** Configures an external hosted registry with explicit credentials */
-    withHostedRegistryCredentials(registryUrl: string, username: string, password: string): DokployProjectEnvironmentResourcePromise {
-        return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.withHostedRegistryCredentials(registryUrl, username, password)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): DokployProjectEnvironmentResourcePromise {
         return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): DokployProjectEnvironmentResourcePromise {
-        return new DokployProjectEnvironmentResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -13710,41 +10148,11 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<DotnetToolResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new DotnetToolResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): DotnetToolResourcePromise {
-        return new DotnetToolResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<DotnetToolResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new DotnetToolResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): DotnetToolResourcePromise {
-        return new DotnetToolResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<DotnetToolResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<DotnetToolResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
@@ -13755,7 +10163,7 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): DotnetToolResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -13772,6 +10180,21 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<DotnetToolResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new DotnetToolResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -13837,6 +10260,41 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._withArgsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<DotnetToolResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new DotnetToolResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<DotnetToolResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new DotnetToolResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -14046,6 +10504,26 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<DotnetToolResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new DotnetToolResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<DotnetToolResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -14137,7 +10615,7 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<DotnetToolResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new DotnetToolResource(result, this._client);
@@ -14167,7 +10645,7 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<DotnetToolResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new DotnetToolResource(result, this._client);
@@ -14213,7 +10691,7 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new DotnetToolResource(result, this._client);
@@ -14318,7 +10796,7 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new DotnetToolResource(result, this._client);
@@ -14346,10 +10824,25 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<DotnetToolResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new DotnetToolResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<DotnetToolResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new DotnetToolResource(result, this._client);
@@ -14364,7 +10857,7 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<DotnetToolResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new DotnetToolResource(result, this._client);
@@ -14492,6 +10985,26 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
         const tags = options?.tags;
         const description = options?.description;
         return new DotnetToolResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<DotnetToolResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new DotnetToolResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -14624,28 +11137,6 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<DotnetToolResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new DotnetToolResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): DotnetToolResourcePromise {
-        return new DotnetToolResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<DotnetToolResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
@@ -14655,24 +11146,8 @@ export class DotnetToolResource extends ResourceBuilderBase<DotnetToolResourceHa
         return new DotnetToolResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<DotnetToolResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<DotnetToolResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new DotnetToolResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): DotnetToolResourcePromise {
-        return new DotnetToolResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -14772,24 +11247,19 @@ export class DotnetToolResourcePromise implements PromiseLike<DotnetToolResource
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): DotnetToolResourcePromise {
-        return new DotnetToolResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): DotnetToolResourcePromise {
-        return new DotnetToolResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): DotnetToolResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -14810,6 +11280,16 @@ export class DotnetToolResourcePromise implements PromiseLike<DotnetToolResource
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -14865,6 +11345,11 @@ export class DotnetToolResourcePromise implements PromiseLike<DotnetToolResource
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -14957,6 +11442,11 @@ export class DotnetToolResourcePromise implements PromiseLike<DotnetToolResource
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -14997,6 +11487,11 @@ export class DotnetToolResourcePromise implements PromiseLike<DotnetToolResource
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
     }
 
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): DotnetToolResourcePromise {
+        return new DotnetToolResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
+    }
+
     /** Configures pipeline step dependencies via a callback */
     withPipelineConfiguration(callback: (obj: PipelineConfigurationContext) => Promise<void>): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.withPipelineConfiguration(callback)));
@@ -15032,19 +11527,8 @@ export class DotnetToolResourcePromise implements PromiseLike<DotnetToolResource
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): DotnetToolResourcePromise {
-        return new DotnetToolResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): DotnetToolResourcePromise {
         return new DotnetToolResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): DotnetToolResourcePromise {
-        return new DotnetToolResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -15224,41 +11708,11 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<ExecutableResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<ExecutableResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new ExecutableResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): ExecutableResourcePromise {
-        return new ExecutableResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<ExecutableResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<ExecutableResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new ExecutableResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): ExecutableResourcePromise {
-        return new ExecutableResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<ExecutableResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<ExecutableResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<ExecutableResourceHandle>(
@@ -15269,7 +11723,7 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): ExecutableResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -15286,6 +11740,21 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<ExecutableResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<ExecutableResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new ExecutableResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -15351,6 +11820,41 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._withArgsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<ExecutableResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ExecutableResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new ExecutableResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<ExecutableResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<ExecutableResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new ExecutableResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -15560,6 +12064,26 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<ExecutableResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ExecutableResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new ExecutableResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<ExecutableResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -15651,7 +12175,7 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<ExecutableResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<ExecutableResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new ExecutableResource(result, this._client);
@@ -15681,7 +12205,7 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<ExecutableResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<ExecutableResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new ExecutableResource(result, this._client);
@@ -15727,7 +12251,7 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<ExecutableResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new ExecutableResource(result, this._client);
@@ -15832,7 +12356,7 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<ExecutableResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new ExecutableResource(result, this._client);
@@ -15860,10 +12384,25 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<ExecutableResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<ExecutableResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new ExecutableResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<ExecutableResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<ExecutableResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new ExecutableResource(result, this._client);
@@ -15878,7 +12417,7 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<ExecutableResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<ExecutableResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new ExecutableResource(result, this._client);
@@ -16006,6 +12545,26 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
         const tags = options?.tags;
         const description = options?.description;
         return new ExecutableResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<ExecutableResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ExecutableResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new ExecutableResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -16138,28 +12697,6 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<ExecutableResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<ExecutableResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new ExecutableResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): ExecutableResourcePromise {
-        return new ExecutableResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<ExecutableResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<ExecutableResourceHandle>(
@@ -16169,24 +12706,8 @@ export class ExecutableResource extends ResourceBuilderBase<ExecutableResourceHa
         return new ExecutableResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<ExecutableResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<ExecutableResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new ExecutableResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ExecutableResourcePromise {
-        return new ExecutableResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -16256,24 +12777,19 @@ export class ExecutableResourcePromise implements PromiseLike<ExecutableResource
         return new ExecutableResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): ExecutableResourcePromise {
-        return new ExecutableResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): ExecutableResourcePromise {
-        return new ExecutableResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): ExecutableResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -16294,6 +12810,16 @@ export class ExecutableResourcePromise implements PromiseLike<ExecutableResource
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -16349,6 +12875,11 @@ export class ExecutableResourcePromise implements PromiseLike<ExecutableResource
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -16441,6 +12972,11 @@ export class ExecutableResourcePromise implements PromiseLike<ExecutableResource
         return new ExecutableResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -16481,6 +13017,11 @@ export class ExecutableResourcePromise implements PromiseLike<ExecutableResource
         return new ExecutableResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
     }
 
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ExecutableResourcePromise {
+        return new ExecutableResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
+    }
+
     /** Configures pipeline step dependencies via a callback */
     withPipelineConfiguration(callback: (obj: PipelineConfigurationContext) => Promise<void>): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._promise.then(obj => obj.withPipelineConfiguration(callback)));
@@ -16516,19 +13057,8 @@ export class ExecutableResourcePromise implements PromiseLike<ExecutableResource
         return new ExecutableResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): ExecutableResourcePromise {
-        return new ExecutableResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ExecutableResourcePromise {
         return new ExecutableResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ExecutableResourcePromise {
-        return new ExecutableResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -16630,6 +13160,26 @@ export class ExternalServiceResource extends ResourceBuilderBase<ExternalService
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): ExternalServiceResourcePromise {
         return new ExternalServiceResourcePromise(this._withUrlsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<ExternalServiceResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ExternalServiceResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new ExternalServiceResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ExternalServiceResourcePromise {
+        return new ExternalServiceResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
     }
 
     /** @internal */
@@ -16753,10 +13303,25 @@ export class ExternalServiceResource extends ResourceBuilderBase<ExternalService
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<ExternalServiceResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<ExternalServiceResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new ExternalServiceResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ExternalServiceResourcePromise {
+        return new ExternalServiceResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<ExternalServiceResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<ExternalServiceResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new ExternalServiceResource(result, this._client);
@@ -16771,7 +13336,7 @@ export class ExternalServiceResource extends ResourceBuilderBase<ExternalService
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<ExternalServiceResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<ExternalServiceResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new ExternalServiceResource(result, this._client);
@@ -16840,6 +13405,26 @@ export class ExternalServiceResource extends ResourceBuilderBase<ExternalService
         const tags = options?.tags;
         const description = options?.description;
         return new ExternalServiceResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<ExternalServiceResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ExternalServiceResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new ExternalServiceResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ExternalServiceResourcePromise {
+        return new ExternalServiceResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -16961,24 +13546,8 @@ export class ExternalServiceResource extends ResourceBuilderBase<ExternalService
         return new ExternalServiceResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ExternalServiceResourcePromise {
         return new ExternalServiceResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<ExternalServiceResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<ExternalServiceResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new ExternalServiceResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ExternalServiceResourcePromise {
-        return new ExternalServiceResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -17023,6 +13592,11 @@ export class ExternalServiceResourcePromise implements PromiseLike<ExternalServi
         return new ExternalServiceResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
     }
 
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ExternalServiceResourcePromise {
+        return new ExternalServiceResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
+    }
+
     /** Adds or modifies displayed URLs */
     withUrl(url: string, options?: WithUrlOptions): ExternalServiceResourcePromise {
         return new ExternalServiceResourcePromise(this._promise.then(obj => obj.withUrl(url, options)));
@@ -17058,6 +13632,11 @@ export class ExternalServiceResourcePromise implements PromiseLike<ExternalServi
         return new ExternalServiceResourcePromise(this._promise.then(obj => obj.withCommand(name, displayName, executeCommand, options)));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ExternalServiceResourcePromise {
+        return new ExternalServiceResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): ExternalServiceResourcePromise {
         return new ExternalServiceResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -17081,6 +13660,11 @@ export class ExternalServiceResourcePromise implements PromiseLike<ExternalServi
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): ExternalServiceResourcePromise {
         return new ExternalServiceResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ExternalServiceResourcePromise {
+        return new ExternalServiceResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -17113,14 +13697,8 @@ export class ExternalServiceResourcePromise implements PromiseLike<ExternalServi
         return new ExternalServiceResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ExternalServiceResourcePromise {
         return new ExternalServiceResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ExternalServiceResourcePromise {
-        return new ExternalServiceResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -17330,41 +13908,11 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<JavaScriptAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new JavaScriptAppResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): JavaScriptAppResourcePromise {
-        return new JavaScriptAppResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<JavaScriptAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new JavaScriptAppResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): JavaScriptAppResourcePromise {
-        return new JavaScriptAppResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<JavaScriptAppResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<JavaScriptAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
@@ -17375,7 +13923,7 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -17392,6 +13940,21 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<JavaScriptAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new JavaScriptAppResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -17457,6 +14020,41 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._withArgsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<JavaScriptAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new JavaScriptAppResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<JavaScriptAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new JavaScriptAppResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -17666,6 +14264,26 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<JavaScriptAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new JavaScriptAppResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<JavaScriptAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -17787,7 +14405,7 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<JavaScriptAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new JavaScriptAppResource(result, this._client);
@@ -17817,7 +14435,7 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<JavaScriptAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new JavaScriptAppResource(result, this._client);
@@ -17863,7 +14481,7 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new JavaScriptAppResource(result, this._client);
@@ -17968,7 +14586,7 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new JavaScriptAppResource(result, this._client);
@@ -17996,10 +14614,25 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<JavaScriptAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new JavaScriptAppResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<JavaScriptAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new JavaScriptAppResource(result, this._client);
@@ -18014,7 +14647,7 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<JavaScriptAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new JavaScriptAppResource(result, this._client);
@@ -18142,6 +14775,26 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
         const tags = options?.tags;
         const description = options?.description;
         return new JavaScriptAppResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<JavaScriptAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new JavaScriptAppResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -18403,28 +15056,6 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<JavaScriptAppResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new JavaScriptAppResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): JavaScriptAppResourcePromise {
-        return new JavaScriptAppResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<JavaScriptAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
@@ -18434,24 +15065,8 @@ export class JavaScriptAppResource extends ResourceBuilderBase<JavaScriptAppReso
         return new JavaScriptAppResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<JavaScriptAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<JavaScriptAppResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new JavaScriptAppResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): JavaScriptAppResourcePromise {
-        return new JavaScriptAppResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -18521,24 +15136,19 @@ export class JavaScriptAppResourcePromise implements PromiseLike<JavaScriptAppRe
         return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): JavaScriptAppResourcePromise {
-        return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): JavaScriptAppResourcePromise {
-        return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -18559,6 +15169,16 @@ export class JavaScriptAppResourcePromise implements PromiseLike<JavaScriptAppRe
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -18614,6 +15234,11 @@ export class JavaScriptAppResourcePromise implements PromiseLike<JavaScriptAppRe
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -18716,6 +15341,11 @@ export class JavaScriptAppResourcePromise implements PromiseLike<JavaScriptAppRe
         return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -18754,6 +15384,11 @@ export class JavaScriptAppResourcePromise implements PromiseLike<JavaScriptAppRe
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): JavaScriptAppResourcePromise {
+        return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -18826,19 +15461,8 @@ export class JavaScriptAppResourcePromise implements PromiseLike<JavaScriptAppRe
         return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.withBrowserDebugger(options)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): JavaScriptAppResourcePromise {
-        return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): JavaScriptAppResourcePromise {
         return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): JavaScriptAppResourcePromise {
-        return new JavaScriptAppResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -19048,41 +15672,11 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<NodeAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new NodeAppResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): NodeAppResourcePromise {
-        return new NodeAppResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<NodeAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new NodeAppResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): NodeAppResourcePromise {
-        return new NodeAppResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<NodeAppResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<NodeAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<NodeAppResourceHandle>(
@@ -19093,7 +15687,7 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): NodeAppResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -19110,6 +15704,21 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<NodeAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<NodeAppResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new NodeAppResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -19175,6 +15784,41 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._withArgsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<NodeAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<NodeAppResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new NodeAppResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<NodeAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<NodeAppResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new NodeAppResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -19384,6 +16028,26 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<NodeAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<NodeAppResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new NodeAppResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<NodeAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -19460,7 +16124,7 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     private async _publishWithContainerFilesInternal(source: ResourceBuilderBase, destinationPath: string): Promise<NodeAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, source, destinationPath };
         const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Aspire.Hosting/publishWithContainerFiles',
+            'Aspire.Hosting/publishWithContainerFilesFromResource',
             rpcArgs
         );
         return new NodeAppResource(result, this._client);
@@ -19520,7 +16184,7 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<NodeAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new NodeAppResource(result, this._client);
@@ -19550,7 +16214,7 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<NodeAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new NodeAppResource(result, this._client);
@@ -19596,7 +16260,7 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new NodeAppResource(result, this._client);
@@ -19701,7 +16365,7 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new NodeAppResource(result, this._client);
@@ -19729,10 +16393,25 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<NodeAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<NodeAppResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new NodeAppResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<NodeAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new NodeAppResource(result, this._client);
@@ -19747,7 +16426,7 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<NodeAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new NodeAppResource(result, this._client);
@@ -19875,6 +16554,26 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
         const tags = options?.tags;
         const description = options?.description;
         return new NodeAppResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<NodeAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<NodeAppResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new NodeAppResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -20136,28 +16835,6 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<NodeAppResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new NodeAppResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): NodeAppResourcePromise {
-        return new NodeAppResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<NodeAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<NodeAppResourceHandle>(
@@ -20167,24 +16844,8 @@ export class NodeAppResource extends ResourceBuilderBase<NodeAppResourceHandle> 
         return new NodeAppResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<NodeAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<NodeAppResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new NodeAppResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): NodeAppResourcePromise {
-        return new NodeAppResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -20254,24 +16915,19 @@ export class NodeAppResourcePromise implements PromiseLike<NodeAppResource> {
         return new NodeAppResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): NodeAppResourcePromise {
-        return new NodeAppResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): NodeAppResourcePromise {
-        return new NodeAppResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): NodeAppResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -20292,6 +16948,16 @@ export class NodeAppResourcePromise implements PromiseLike<NodeAppResource> {
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -20347,6 +17013,11 @@ export class NodeAppResourcePromise implements PromiseLike<NodeAppResource> {
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -20454,6 +17125,11 @@ export class NodeAppResourcePromise implements PromiseLike<NodeAppResource> {
         return new NodeAppResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -20492,6 +17168,11 @@ export class NodeAppResourcePromise implements PromiseLike<NodeAppResource> {
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): NodeAppResourcePromise {
+        return new NodeAppResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -20564,19 +17245,8 @@ export class NodeAppResourcePromise implements PromiseLike<NodeAppResource> {
         return new NodeAppResourcePromise(this._promise.then(obj => obj.withBrowserDebugger(options)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): NodeAppResourcePromise {
-        return new NodeAppResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): NodeAppResourcePromise {
         return new NodeAppResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): NodeAppResourcePromise {
-        return new NodeAppResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -20676,6 +17346,26 @@ export class ParameterResource extends ResourceBuilderBase<ParameterResourceHand
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): ParameterResourcePromise {
         return new ParameterResourcePromise(this._withUrlsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<ParameterResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ParameterResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new ParameterResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ParameterResourcePromise {
+        return new ParameterResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
     }
 
     /** @internal */
@@ -20799,10 +17489,25 @@ export class ParameterResource extends ResourceBuilderBase<ParameterResourceHand
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<ParameterResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<ParameterResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new ParameterResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ParameterResourcePromise {
+        return new ParameterResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<ParameterResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<ParameterResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new ParameterResource(result, this._client);
@@ -20817,7 +17522,7 @@ export class ParameterResource extends ResourceBuilderBase<ParameterResourceHand
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<ParameterResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<ParameterResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new ParameterResource(result, this._client);
@@ -20886,6 +17591,26 @@ export class ParameterResource extends ResourceBuilderBase<ParameterResourceHand
         const tags = options?.tags;
         const description = options?.description;
         return new ParameterResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<ParameterResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ParameterResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new ParameterResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ParameterResourcePromise {
+        return new ParameterResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -21007,24 +17732,8 @@ export class ParameterResource extends ResourceBuilderBase<ParameterResourceHand
         return new ParameterResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ParameterResourcePromise {
         return new ParameterResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<ParameterResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<ParameterResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new ParameterResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ParameterResourcePromise {
-        return new ParameterResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -21069,6 +17778,11 @@ export class ParameterResourcePromise implements PromiseLike<ParameterResource> 
         return new ParameterResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
     }
 
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ParameterResourcePromise {
+        return new ParameterResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
+    }
+
     /** Adds or modifies displayed URLs */
     withUrl(url: string, options?: WithUrlOptions): ParameterResourcePromise {
         return new ParameterResourcePromise(this._promise.then(obj => obj.withUrl(url, options)));
@@ -21104,6 +17818,11 @@ export class ParameterResourcePromise implements PromiseLike<ParameterResource> 
         return new ParameterResourcePromise(this._promise.then(obj => obj.withCommand(name, displayName, executeCommand, options)));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ParameterResourcePromise {
+        return new ParameterResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): ParameterResourcePromise {
         return new ParameterResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -21127,6 +17846,11 @@ export class ParameterResourcePromise implements PromiseLike<ParameterResource> 
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): ParameterResourcePromise {
         return new ParameterResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ParameterResourcePromise {
+        return new ParameterResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -21159,14 +17883,8 @@ export class ParameterResourcePromise implements PromiseLike<ParameterResource> 
         return new ParameterResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ParameterResourcePromise {
         return new ParameterResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ParameterResourcePromise {
-        return new ParameterResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -21333,41 +18051,11 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<ProjectResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new ProjectResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): ProjectResourcePromise {
-        return new ProjectResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<ProjectResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new ProjectResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): ProjectResourcePromise {
-        return new ProjectResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<ProjectResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<ProjectResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<ProjectResourceHandle>(
@@ -21378,7 +18066,7 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): ProjectResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): ProjectResourcePromise {
         return new ProjectResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -21395,6 +18083,21 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): ProjectResourcePromise {
         return new ProjectResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<ProjectResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<ProjectResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new ProjectResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -21460,6 +18163,41 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): ProjectResourcePromise {
         return new ProjectResourcePromise(this._withArgsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<ProjectResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ProjectResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new ProjectResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<ProjectResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<ProjectResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new ProjectResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -21669,6 +18407,26 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<ProjectResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ProjectResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new ProjectResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<ProjectResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -21745,7 +18503,7 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     private async _publishWithContainerFilesInternal(source: ResourceBuilderBase, destinationPath: string): Promise<ProjectResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, source, destinationPath };
         const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Aspire.Hosting/publishWithContainerFiles',
+            'Aspire.Hosting/publishWithContainerFilesFromResource',
             rpcArgs
         );
         return new ProjectResource(result, this._client);
@@ -21775,7 +18533,7 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<ProjectResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new ProjectResource(result, this._client);
@@ -21805,7 +18563,7 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<ProjectResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new ProjectResource(result, this._client);
@@ -21851,7 +18609,7 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new ProjectResource(result, this._client);
@@ -21956,7 +18714,7 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new ProjectResource(result, this._client);
@@ -21984,10 +18742,25 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<ProjectResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<ProjectResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new ProjectResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<ProjectResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new ProjectResource(result, this._client);
@@ -22002,7 +18775,7 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<ProjectResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new ProjectResource(result, this._client);
@@ -22130,6 +18903,26 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
         const tags = options?.tags;
         const description = options?.description;
         return new ProjectResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<ProjectResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ProjectResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new ProjectResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -22262,28 +19055,6 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<ProjectResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new ProjectResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): ProjectResourcePromise {
-        return new ProjectResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<ProjectResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<ProjectResourceHandle>(
@@ -22293,24 +19064,8 @@ export class ProjectResource extends ResourceBuilderBase<ProjectResourceHandle> 
         return new ProjectResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ProjectResourcePromise {
         return new ProjectResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<ProjectResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<ProjectResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new ProjectResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ProjectResourcePromise {
-        return new ProjectResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -22375,24 +19130,19 @@ export class ProjectResourcePromise implements PromiseLike<ProjectResource> {
         return new ProjectResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): ProjectResourcePromise {
-        return new ProjectResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): ProjectResourcePromise {
-        return new ProjectResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): ProjectResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): ProjectResourcePromise {
         return new ProjectResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): ProjectResourcePromise {
         return new ProjectResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -22413,6 +19163,16 @@ export class ProjectResourcePromise implements PromiseLike<ProjectResource> {
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): ProjectResourcePromise {
         return new ProjectResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -22468,6 +19228,11 @@ export class ProjectResourcePromise implements PromiseLike<ProjectResource> {
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): ProjectResourcePromise {
         return new ProjectResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -22565,6 +19330,11 @@ export class ProjectResourcePromise implements PromiseLike<ProjectResource> {
         return new ProjectResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): ProjectResourcePromise {
         return new ProjectResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -22605,6 +19375,11 @@ export class ProjectResourcePromise implements PromiseLike<ProjectResource> {
         return new ProjectResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
     }
 
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ProjectResourcePromise {
+        return new ProjectResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
+    }
+
     /** Configures pipeline step dependencies via a callback */
     withPipelineConfiguration(callback: (obj: PipelineConfigurationContext) => Promise<void>): ProjectResourcePromise {
         return new ProjectResourcePromise(this._promise.then(obj => obj.withPipelineConfiguration(callback)));
@@ -22640,19 +19415,8 @@ export class ProjectResourcePromise implements PromiseLike<ProjectResource> {
         return new ProjectResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): ProjectResourcePromise {
-        return new ProjectResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ProjectResourcePromise {
         return new ProjectResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ProjectResourcePromise {
-        return new ProjectResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -22870,7 +19634,7 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     }
 
     /** @internal */
-    private async _withBuildArgInternal(name: string, value: ParameterResource): Promise<RedisCommanderResource> {
+    private async _withBuildArgInternal(name: string, value: string | ParameterResource): Promise<RedisCommanderResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
             'Aspire.Hosting/withBuildArg',
@@ -22879,8 +19643,8 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
         return new RedisCommanderResource(result, this._client);
     }
 
-    /** Adds a build argument from a parameter resource */
-    withBuildArg(name: string, value: ParameterResource): RedisCommanderResourcePromise {
+    /** Adds a build argument from a string value or parameter resource */
+    withBuildArg(name: string, value: string | ParameterResource): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._withBuildArgInternal(name, value));
     }
 
@@ -22888,7 +19652,7 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     private async _withBuildSecretInternal(name: string, value: ParameterResource): Promise<RedisCommanderResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Aspire.Hosting/withBuildSecret',
+            'Aspire.Hosting/withParameterBuildSecret',
             rpcArgs
         );
         return new RedisCommanderResource(result, this._client);
@@ -22897,6 +19661,27 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     /** Adds a build secret from a parameter resource */
     withBuildSecret(name: string, value: ParameterResource): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._withBuildSecretInternal(name, value));
+    }
+
+    /** @internal */
+    private async _withContainerCertificatePathsInternal(customCertificatesDestination?: string, defaultCertificateBundlePaths?: string[], defaultCertificateDirectoryPaths?: string[]): Promise<RedisCommanderResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle };
+        if (customCertificatesDestination !== undefined) rpcArgs.customCertificatesDestination = customCertificatesDestination;
+        if (defaultCertificateBundlePaths !== undefined) rpcArgs.defaultCertificateBundlePaths = defaultCertificateBundlePaths;
+        if (defaultCertificateDirectoryPaths !== undefined) rpcArgs.defaultCertificateDirectoryPaths = defaultCertificateDirectoryPaths;
+        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
+            'Aspire.Hosting/withContainerCertificatePaths',
+            rpcArgs
+        );
+        return new RedisCommanderResource(result, this._client);
+    }
+
+    /** Overrides container certificate bundle and directory paths used for trust configuration */
+    withContainerCertificatePaths(options?: WithContainerCertificatePathsOptions): RedisCommanderResourcePromise {
+        const customCertificatesDestination = options?.customCertificatesDestination;
+        const defaultCertificateBundlePaths = options?.defaultCertificateBundlePaths;
+        const defaultCertificateDirectoryPaths = options?.defaultCertificateDirectoryPaths;
+        return new RedisCommanderResourcePromise(this._withContainerCertificatePathsInternal(customCertificatesDestination, defaultCertificateBundlePaths, defaultCertificateDirectoryPaths));
     }
 
     /** @internal */
@@ -23030,41 +19815,11 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<RedisCommanderResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new RedisCommanderResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): RedisCommanderResourcePromise {
-        return new RedisCommanderResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<RedisCommanderResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new RedisCommanderResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): RedisCommanderResourcePromise {
-        return new RedisCommanderResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<RedisCommanderResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<RedisCommanderResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
@@ -23075,7 +19830,7 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -23092,6 +19847,21 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<RedisCommanderResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new RedisCommanderResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -23157,6 +19927,41 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._withArgsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<RedisCommanderResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new RedisCommanderResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<RedisCommanderResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new RedisCommanderResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -23366,6 +20171,26 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<RedisCommanderResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new RedisCommanderResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<RedisCommanderResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -23457,7 +20282,7 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<RedisCommanderResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new RedisCommanderResource(result, this._client);
@@ -23487,7 +20312,7 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<RedisCommanderResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new RedisCommanderResource(result, this._client);
@@ -23533,7 +20358,7 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new RedisCommanderResource(result, this._client);
@@ -23638,7 +20463,7 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new RedisCommanderResource(result, this._client);
@@ -23666,10 +20491,25 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<RedisCommanderResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new RedisCommanderResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<RedisCommanderResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new RedisCommanderResource(result, this._client);
@@ -23684,7 +20524,7 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<RedisCommanderResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new RedisCommanderResource(result, this._client);
@@ -23812,6 +20652,26 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
         const tags = options?.tags;
         const description = options?.description;
         return new RedisCommanderResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<RedisCommanderResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new RedisCommanderResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -23980,28 +20840,6 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<RedisCommanderResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new RedisCommanderResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): RedisCommanderResourcePromise {
-        return new RedisCommanderResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<RedisCommanderResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
@@ -24011,24 +20849,8 @@ export class RedisCommanderResource extends ResourceBuilderBase<RedisCommanderRe
         return new RedisCommanderResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<RedisCommanderResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<RedisCommanderResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new RedisCommanderResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): RedisCommanderResourcePromise {
-        return new RedisCommanderResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -24113,14 +20935,19 @@ export class RedisCommanderResourcePromise implements PromiseLike<RedisCommander
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withContainerName(name)));
     }
 
-    /** Adds a build argument from a parameter resource */
-    withBuildArg(name: string, value: ParameterResource): RedisCommanderResourcePromise {
+    /** Adds a build argument from a string value or parameter resource */
+    withBuildArg(name: string, value: string | ParameterResource): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withBuildArg(name, value)));
     }
 
     /** Adds a build secret from a parameter resource */
     withBuildSecret(name: string, value: ParameterResource): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withBuildSecret(name, value)));
+    }
+
+    /** Overrides container certificate bundle and directory paths used for trust configuration */
+    withContainerCertificatePaths(options?: WithContainerCertificatePathsOptions): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withContainerCertificatePaths(options)));
     }
 
     /** Configures endpoint proxy support */
@@ -24163,24 +20990,19 @@ export class RedisCommanderResourcePromise implements PromiseLike<RedisCommander
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): RedisCommanderResourcePromise {
-        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): RedisCommanderResourcePromise {
-        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -24201,6 +21023,16 @@ export class RedisCommanderResourcePromise implements PromiseLike<RedisCommander
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -24256,6 +21088,11 @@ export class RedisCommanderResourcePromise implements PromiseLike<RedisCommander
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -24348,6 +21185,11 @@ export class RedisCommanderResourcePromise implements PromiseLike<RedisCommander
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -24386,6 +21228,11 @@ export class RedisCommanderResourcePromise implements PromiseLike<RedisCommander
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): RedisCommanderResourcePromise {
+        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -24433,19 +21280,8 @@ export class RedisCommanderResourcePromise implements PromiseLike<RedisCommander
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.withHostPort(options)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): RedisCommanderResourcePromise {
-        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): RedisCommanderResourcePromise {
         return new RedisCommanderResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): RedisCommanderResourcePromise {
-        return new RedisCommanderResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -24663,7 +21499,7 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     }
 
     /** @internal */
-    private async _withBuildArgInternal(name: string, value: ParameterResource): Promise<RedisInsightResource> {
+    private async _withBuildArgInternal(name: string, value: string | ParameterResource): Promise<RedisInsightResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
             'Aspire.Hosting/withBuildArg',
@@ -24672,8 +21508,8 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
         return new RedisInsightResource(result, this._client);
     }
 
-    /** Adds a build argument from a parameter resource */
-    withBuildArg(name: string, value: ParameterResource): RedisInsightResourcePromise {
+    /** Adds a build argument from a string value or parameter resource */
+    withBuildArg(name: string, value: string | ParameterResource): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._withBuildArgInternal(name, value));
     }
 
@@ -24681,7 +21517,7 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     private async _withBuildSecretInternal(name: string, value: ParameterResource): Promise<RedisInsightResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Aspire.Hosting/withBuildSecret',
+            'Aspire.Hosting/withParameterBuildSecret',
             rpcArgs
         );
         return new RedisInsightResource(result, this._client);
@@ -24690,6 +21526,27 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     /** Adds a build secret from a parameter resource */
     withBuildSecret(name: string, value: ParameterResource): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._withBuildSecretInternal(name, value));
+    }
+
+    /** @internal */
+    private async _withContainerCertificatePathsInternal(customCertificatesDestination?: string, defaultCertificateBundlePaths?: string[], defaultCertificateDirectoryPaths?: string[]): Promise<RedisInsightResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle };
+        if (customCertificatesDestination !== undefined) rpcArgs.customCertificatesDestination = customCertificatesDestination;
+        if (defaultCertificateBundlePaths !== undefined) rpcArgs.defaultCertificateBundlePaths = defaultCertificateBundlePaths;
+        if (defaultCertificateDirectoryPaths !== undefined) rpcArgs.defaultCertificateDirectoryPaths = defaultCertificateDirectoryPaths;
+        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
+            'Aspire.Hosting/withContainerCertificatePaths',
+            rpcArgs
+        );
+        return new RedisInsightResource(result, this._client);
+    }
+
+    /** Overrides container certificate bundle and directory paths used for trust configuration */
+    withContainerCertificatePaths(options?: WithContainerCertificatePathsOptions): RedisInsightResourcePromise {
+        const customCertificatesDestination = options?.customCertificatesDestination;
+        const defaultCertificateBundlePaths = options?.defaultCertificateBundlePaths;
+        const defaultCertificateDirectoryPaths = options?.defaultCertificateDirectoryPaths;
+        return new RedisInsightResourcePromise(this._withContainerCertificatePathsInternal(customCertificatesDestination, defaultCertificateBundlePaths, defaultCertificateDirectoryPaths));
     }
 
     /** @internal */
@@ -24823,41 +21680,11 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<RedisInsightResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new RedisInsightResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): RedisInsightResourcePromise {
-        return new RedisInsightResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<RedisInsightResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new RedisInsightResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): RedisInsightResourcePromise {
-        return new RedisInsightResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<RedisInsightResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<RedisInsightResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
@@ -24868,7 +21695,7 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): RedisInsightResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -24885,6 +21712,21 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<RedisInsightResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new RedisInsightResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -24950,6 +21792,41 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._withArgsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<RedisInsightResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new RedisInsightResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<RedisInsightResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new RedisInsightResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -25159,6 +22036,26 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<RedisInsightResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new RedisInsightResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<RedisInsightResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -25250,7 +22147,7 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<RedisInsightResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new RedisInsightResource(result, this._client);
@@ -25280,7 +22177,7 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<RedisInsightResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new RedisInsightResource(result, this._client);
@@ -25326,7 +22223,7 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new RedisInsightResource(result, this._client);
@@ -25431,7 +22328,7 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new RedisInsightResource(result, this._client);
@@ -25459,10 +22356,25 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<RedisInsightResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new RedisInsightResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<RedisInsightResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new RedisInsightResource(result, this._client);
@@ -25477,7 +22389,7 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<RedisInsightResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new RedisInsightResource(result, this._client);
@@ -25605,6 +22517,26 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
         const tags = options?.tags;
         const description = options?.description;
         return new RedisInsightResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<RedisInsightResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new RedisInsightResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -25805,28 +22737,6 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<RedisInsightResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new RedisInsightResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): RedisInsightResourcePromise {
-        return new RedisInsightResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<RedisInsightResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
@@ -25836,24 +22746,8 @@ export class RedisInsightResource extends ResourceBuilderBase<RedisInsightResour
         return new RedisInsightResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<RedisInsightResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<RedisInsightResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new RedisInsightResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): RedisInsightResourcePromise {
-        return new RedisInsightResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -25938,14 +22832,19 @@ export class RedisInsightResourcePromise implements PromiseLike<RedisInsightReso
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withContainerName(name)));
     }
 
-    /** Adds a build argument from a parameter resource */
-    withBuildArg(name: string, value: ParameterResource): RedisInsightResourcePromise {
+    /** Adds a build argument from a string value or parameter resource */
+    withBuildArg(name: string, value: string | ParameterResource): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withBuildArg(name, value)));
     }
 
     /** Adds a build secret from a parameter resource */
     withBuildSecret(name: string, value: ParameterResource): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withBuildSecret(name, value)));
+    }
+
+    /** Overrides container certificate bundle and directory paths used for trust configuration */
+    withContainerCertificatePaths(options?: WithContainerCertificatePathsOptions): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._promise.then(obj => obj.withContainerCertificatePaths(options)));
     }
 
     /** Configures endpoint proxy support */
@@ -25988,24 +22887,19 @@ export class RedisInsightResourcePromise implements PromiseLike<RedisInsightReso
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): RedisInsightResourcePromise {
-        return new RedisInsightResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): RedisInsightResourcePromise {
-        return new RedisInsightResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): RedisInsightResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -26026,6 +22920,16 @@ export class RedisInsightResourcePromise implements PromiseLike<RedisInsightReso
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -26081,6 +22985,11 @@ export class RedisInsightResourcePromise implements PromiseLike<RedisInsightReso
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -26173,6 +23082,11 @@ export class RedisInsightResourcePromise implements PromiseLike<RedisInsightReso
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -26211,6 +23125,11 @@ export class RedisInsightResourcePromise implements PromiseLike<RedisInsightReso
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): RedisInsightResourcePromise {
+        return new RedisInsightResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -26268,19 +23187,8 @@ export class RedisInsightResourcePromise implements PromiseLike<RedisInsightReso
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.withDataBindMount(source)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): RedisInsightResourcePromise {
-        return new RedisInsightResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): RedisInsightResourcePromise {
         return new RedisInsightResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): RedisInsightResourcePromise {
-        return new RedisInsightResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -26614,7 +23522,7 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     }
 
     /** @internal */
-    private async _withBuildArgInternal(name: string, value: ParameterResource): Promise<RedisResource> {
+    private async _withBuildArgInternal(name: string, value: string | ParameterResource): Promise<RedisResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<RedisResourceHandle>(
             'Aspire.Hosting/withBuildArg',
@@ -26623,8 +23531,8 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
         return new RedisResource(result, this._client);
     }
 
-    /** Adds a build argument from a parameter resource */
-    withBuildArg(name: string, value: ParameterResource): RedisResourcePromise {
+    /** Adds a build argument from a string value or parameter resource */
+    withBuildArg(name: string, value: string | ParameterResource): RedisResourcePromise {
         return new RedisResourcePromise(this._withBuildArgInternal(name, value));
     }
 
@@ -26632,7 +23540,7 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     private async _withBuildSecretInternal(name: string, value: ParameterResource): Promise<RedisResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Aspire.Hosting/withBuildSecret',
+            'Aspire.Hosting/withParameterBuildSecret',
             rpcArgs
         );
         return new RedisResource(result, this._client);
@@ -26641,6 +23549,27 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     /** Adds a build secret from a parameter resource */
     withBuildSecret(name: string, value: ParameterResource): RedisResourcePromise {
         return new RedisResourcePromise(this._withBuildSecretInternal(name, value));
+    }
+
+    /** @internal */
+    private async _withContainerCertificatePathsInternal(customCertificatesDestination?: string, defaultCertificateBundlePaths?: string[], defaultCertificateDirectoryPaths?: string[]): Promise<RedisResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle };
+        if (customCertificatesDestination !== undefined) rpcArgs.customCertificatesDestination = customCertificatesDestination;
+        if (defaultCertificateBundlePaths !== undefined) rpcArgs.defaultCertificateBundlePaths = defaultCertificateBundlePaths;
+        if (defaultCertificateDirectoryPaths !== undefined) rpcArgs.defaultCertificateDirectoryPaths = defaultCertificateDirectoryPaths;
+        const result = await this._client.invokeCapability<RedisResourceHandle>(
+            'Aspire.Hosting/withContainerCertificatePaths',
+            rpcArgs
+        );
+        return new RedisResource(result, this._client);
+    }
+
+    /** Overrides container certificate bundle and directory paths used for trust configuration */
+    withContainerCertificatePaths(options?: WithContainerCertificatePathsOptions): RedisResourcePromise {
+        const customCertificatesDestination = options?.customCertificatesDestination;
+        const defaultCertificateBundlePaths = options?.defaultCertificateBundlePaths;
+        const defaultCertificateDirectoryPaths = options?.defaultCertificateDirectoryPaths;
+        return new RedisResourcePromise(this._withContainerCertificatePathsInternal(customCertificatesDestination, defaultCertificateBundlePaths, defaultCertificateDirectoryPaths));
     }
 
     /** @internal */
@@ -26774,41 +23703,11 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<RedisResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new RedisResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): RedisResourcePromise {
-        return new RedisResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<RedisResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new RedisResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): RedisResourcePromise {
-        return new RedisResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<RedisResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<RedisResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<RedisResourceHandle>(
@@ -26819,7 +23718,7 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): RedisResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): RedisResourcePromise {
         return new RedisResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -26836,6 +23735,21 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): RedisResourcePromise {
         return new RedisResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<RedisResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<RedisResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new RedisResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): RedisResourcePromise {
+        return new RedisResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -26869,7 +23783,7 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     }
 
     /** @internal */
-    private async _withConnectionPropertyInternal(name: string, value: ReferenceExpression): Promise<RedisResource> {
+    private async _withConnectionPropertyInternal(name: string, value: string | ReferenceExpression): Promise<RedisResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<RedisResourceHandle>(
             'Aspire.Hosting/withConnectionProperty',
@@ -26878,8 +23792,8 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
         return new RedisResource(result, this._client);
     }
 
-    /** Adds a connection property with a reference expression */
-    withConnectionProperty(name: string, value: ReferenceExpression): RedisResourcePromise {
+    /** Adds a connection property with a string or reference expression value */
+    withConnectionProperty(name: string, value: string | ReferenceExpression): RedisResourcePromise {
         return new RedisResourcePromise(this._withConnectionPropertyInternal(name, value));
     }
 
@@ -26934,6 +23848,41 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     }
 
     /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<RedisResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<RedisResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new RedisResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): RedisResourcePromise {
+        return new RedisResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<RedisResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<RedisResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new RedisResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): RedisResourcePromise {
+        return new RedisResourcePromise(this._withReferenceEnvironmentInternal(options));
+    }
+
+    /** @internal */
     private async _withReferenceInternal(source: ResourceBuilderBase, connectionName?: string, optional?: boolean, name?: string): Promise<RedisResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, source };
         if (connectionName !== undefined) rpcArgs.connectionName = connectionName;
@@ -26952,6 +23901,15 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
         const optional = options?.optional;
         const name = options?.name;
         return new RedisResourcePromise(this._withReferenceInternal(source, connectionName, optional, name));
+    }
+
+    /** Gets a connection property by key */
+    async getConnectionProperty(key: string): Promise<ReferenceExpression> {
+        const rpcArgs: Record<string, unknown> = { resource: this._handle, key };
+        return await this._client.invokeCapability<ReferenceExpression>(
+            'Aspire.Hosting/getConnectionProperty',
+            rpcArgs
+        );
     }
 
     /** @internal */
@@ -27140,6 +24098,26 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<RedisResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<RedisResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new RedisResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): RedisResourcePromise {
+        return new RedisResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<RedisResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -27231,7 +24209,7 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<RedisResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new RedisResource(result, this._client);
@@ -27261,7 +24239,7 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<RedisResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new RedisResource(result, this._client);
@@ -27307,7 +24285,7 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new RedisResource(result, this._client);
@@ -27412,7 +24390,7 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new RedisResource(result, this._client);
@@ -27440,10 +24418,25 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<RedisResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<RedisResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new RedisResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): RedisResourcePromise {
+        return new RedisResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<RedisResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new RedisResource(result, this._client);
@@ -27458,7 +24451,7 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<RedisResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new RedisResource(result, this._client);
@@ -27586,6 +24579,26 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
         const tags = options?.tags;
         const description = options?.description;
         return new RedisResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<RedisResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<RedisResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new RedisResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): RedisResourcePromise {
+        return new RedisResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -27892,28 +24905,6 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<RedisResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new RedisResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): RedisResourcePromise {
-        return new RedisResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<RedisResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<RedisResourceHandle>(
@@ -27923,24 +24914,8 @@ export class RedisResource extends ResourceBuilderBase<RedisResourceHandle> {
         return new RedisResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): RedisResourcePromise {
         return new RedisResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<RedisResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<RedisResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new RedisResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): RedisResourcePromise {
-        return new RedisResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -28025,14 +25000,19 @@ export class RedisResourcePromise implements PromiseLike<RedisResource> {
         return new RedisResourcePromise(this._promise.then(obj => obj.withContainerName(name)));
     }
 
-    /** Adds a build argument from a parameter resource */
-    withBuildArg(name: string, value: ParameterResource): RedisResourcePromise {
+    /** Adds a build argument from a string value or parameter resource */
+    withBuildArg(name: string, value: string | ParameterResource): RedisResourcePromise {
         return new RedisResourcePromise(this._promise.then(obj => obj.withBuildArg(name, value)));
     }
 
     /** Adds a build secret from a parameter resource */
     withBuildSecret(name: string, value: ParameterResource): RedisResourcePromise {
         return new RedisResourcePromise(this._promise.then(obj => obj.withBuildSecret(name, value)));
+    }
+
+    /** Overrides container certificate bundle and directory paths used for trust configuration */
+    withContainerCertificatePaths(options?: WithContainerCertificatePathsOptions): RedisResourcePromise {
+        return new RedisResourcePromise(this._promise.then(obj => obj.withContainerCertificatePaths(options)));
     }
 
     /** Configures endpoint proxy support */
@@ -28075,24 +25055,19 @@ export class RedisResourcePromise implements PromiseLike<RedisResource> {
         return new RedisResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): RedisResourcePromise {
-        return new RedisResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): RedisResourcePromise {
-        return new RedisResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): RedisResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): RedisResourcePromise {
         return new RedisResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): RedisResourcePromise {
         return new RedisResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): RedisResourcePromise {
+        return new RedisResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -28105,8 +25080,8 @@ export class RedisResourcePromise implements PromiseLike<RedisResource> {
         return new RedisResourcePromise(this._promise.then(obj => obj.withEnvironmentConnectionString(envVarName, resource)));
     }
 
-    /** Adds a connection property with a reference expression */
-    withConnectionProperty(name: string, value: ReferenceExpression): RedisResourcePromise {
+    /** Adds a connection property with a string or reference expression value */
+    withConnectionProperty(name: string, value: string | ReferenceExpression): RedisResourcePromise {
         return new RedisResourcePromise(this._promise.then(obj => obj.withConnectionProperty(name, value)));
     }
 
@@ -28125,9 +25100,24 @@ export class RedisResourcePromise implements PromiseLike<RedisResource> {
         return new RedisResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
     }
 
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): RedisResourcePromise {
+        return new RedisResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): RedisResourcePromise {
+        return new RedisResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
+    }
+
     /** Adds a reference to another resource */
     withReference(source: ResourceBuilderBase, options?: WithReferenceOptions): RedisResourcePromise {
         return new RedisResourcePromise(this._promise.then(obj => obj.withReference(source, options)));
+    }
+
+    /** Gets a connection property by key */
+    getConnectionProperty(key: string): Promise<ReferenceExpression> {
+        return this._promise.then(obj => obj.getConnectionProperty(key));
     }
 
     /** Adds a reference to a URI */
@@ -28178,6 +25168,11 @@ export class RedisResourcePromise implements PromiseLike<RedisResource> {
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): RedisResourcePromise {
         return new RedisResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): RedisResourcePromise {
+        return new RedisResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -28270,6 +25265,11 @@ export class RedisResourcePromise implements PromiseLike<RedisResource> {
         return new RedisResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): RedisResourcePromise {
+        return new RedisResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): RedisResourcePromise {
         return new RedisResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -28308,6 +25308,11 @@ export class RedisResourcePromise implements PromiseLike<RedisResource> {
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): RedisResourcePromise {
         return new RedisResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): RedisResourcePromise {
+        return new RedisResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -28390,19 +25395,8 @@ export class RedisResourcePromise implements PromiseLike<RedisResource> {
         return new RedisResourcePromise(this._promise.then(obj => obj.withHostPort(options)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): RedisResourcePromise {
-        return new RedisResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): RedisResourcePromise {
         return new RedisResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): RedisResourcePromise {
-        return new RedisResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -28612,41 +25606,11 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<ViteAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<ViteAppResourceHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new ViteAppResource(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): ViteAppResourcePromise {
-        return new ViteAppResourcePromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<ViteAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<ViteAppResourceHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new ViteAppResource(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): ViteAppResourcePromise {
-        return new ViteAppResourcePromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<ViteAppResource> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<ViteAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<ViteAppResourceHandle>(
@@ -28657,7 +25621,7 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): ViteAppResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -28674,6 +25638,21 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<ViteAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<ViteAppResourceHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new ViteAppResource(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -28739,6 +25718,41 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._withArgsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<ViteAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ViteAppResourceHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new ViteAppResource(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<ViteAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<ViteAppResourceHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new ViteAppResource(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -28948,6 +25962,26 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
     }
 
     /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<ViteAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ViteAppResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new ViteAppResource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
+    }
+
+    /** @internal */
     private async _withUrlInternal(url: string, displayText?: string): Promise<ViteAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, url };
         if (displayText !== undefined) rpcArgs.displayText = displayText;
@@ -29069,7 +26103,7 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<ViteAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<ViteAppResourceHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new ViteAppResource(result, this._client);
@@ -29099,7 +26133,7 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<ViteAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<ViteAppResourceHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new ViteAppResource(result, this._client);
@@ -29145,7 +26179,7 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<ViteAppResourceHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new ViteAppResource(result, this._client);
@@ -29250,7 +26284,7 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<ViteAppResourceHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new ViteAppResource(result, this._client);
@@ -29278,10 +26312,25 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<ViteAppResource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<ViteAppResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new ViteAppResource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<ViteAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<ViteAppResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new ViteAppResource(result, this._client);
@@ -29296,7 +26345,7 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<ViteAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<ViteAppResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new ViteAppResource(result, this._client);
@@ -29424,6 +26473,26 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
         const tags = options?.tags;
         const description = options?.description;
         return new ViteAppResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<ViteAppResource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<ViteAppResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new ViteAppResource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -29700,28 +26769,6 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
     }
 
     /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<ViteAppResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<ViteAppResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new ViteAppResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): ViteAppResourcePromise {
-        return new ViteAppResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
-    /** @internal */
     private async _publishToDokployInternal(environmentBuilder: DokployProjectEnvironmentResource): Promise<ViteAppResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder };
         const result = await this._client.invokeCapability<ViteAppResourceHandle>(
@@ -29731,24 +26778,8 @@ export class ViteAppResource extends ResourceBuilderBase<ViteAppResourceHandle> 
         return new ViteAppResource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<ViteAppResource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<ViteAppResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new ViteAppResource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ViteAppResourcePromise {
-        return new ViteAppResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -29818,24 +26849,19 @@ export class ViteAppResourcePromise implements PromiseLike<ViteAppResource> {
         return new ViteAppResourcePromise(this._promise.then(obj => obj.withRequiredCommand(command, options)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): ViteAppResourcePromise {
-        return new ViteAppResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): ViteAppResourcePromise {
-        return new ViteAppResourcePromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): ViteAppResourcePromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -29856,6 +26882,16 @@ export class ViteAppResourcePromise implements PromiseLike<ViteAppResource> {
     /** Sets command-line arguments via callback */
     withArgsCallback(callback: (obj: CommandLineArgsCallbackContext) => Promise<void>): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._promise.then(obj => obj.withArgsCallback(callback)));
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -29911,6 +26947,11 @@ export class ViteAppResourcePromise implements PromiseLike<ViteAppResource> {
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
     }
 
     /** Adds or modifies displayed URLs */
@@ -30013,6 +27054,11 @@ export class ViteAppResourcePromise implements PromiseLike<ViteAppResource> {
         return new ViteAppResourcePromise(this._promise.then(obj => obj.withoutHttpsCertificate()));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -30051,6 +27097,11 @@ export class ViteAppResourcePromise implements PromiseLike<ViteAppResource> {
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ViteAppResourcePromise {
+        return new ViteAppResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -30128,19 +27179,8 @@ export class ViteAppResourcePromise implements PromiseLike<ViteAppResource> {
         return new ViteAppResourcePromise(this._promise.then(obj => obj.withBrowserDebugger(options)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): ViteAppResourcePromise {
-        return new ViteAppResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ViteAppResourcePromise {
         return new ViteAppResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ViteAppResourcePromise {
-        return new ViteAppResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -30184,28 +27224,6 @@ export class ComputeResource extends ResourceBuilderBase<IComputeResourceHandle>
         return new ComputeResourcePromise(this._withRemoteImageTagInternal(remoteImageTag));
     }
 
-    /** @internal */
-    private async _publishAsDockerComposeServiceInternal(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): Promise<ComputeResource> {
-        const configureId = registerCallback(async (arg1Data: unknown, arg2Data: unknown) => {
-            const arg1Handle = wrapIfHandle(arg1Data) as DockerComposeServiceResourceHandle;
-            const arg1 = new DockerComposeServiceResource(arg1Handle, this._client);
-            const arg2Handle = wrapIfHandle(arg2Data) as ServiceHandle;
-            const arg2 = new Service(arg2Handle, this._client);
-            await configure(arg1, arg2);
-        });
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, configure: configureId };
-        const result = await this._client.invokeCapability<IComputeResourceHandle>(
-            'Aspire.Hosting.Docker/publishAsDockerComposeService',
-            rpcArgs
-        );
-        return new ComputeResource(result, this._client);
-    }
-
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): ComputeResourcePromise {
-        return new ComputeResourcePromise(this._publishAsDockerComposeServiceInternal(configure));
-    }
-
 }
 
 /**
@@ -30233,11 +27251,6 @@ export class ComputeResourcePromise implements PromiseLike<ComputeResource> {
         return new ComputeResourcePromise(this._promise.then(obj => obj.withRemoteImageTag(remoteImageTag)));
     }
 
-    /** Publishes the resource as a Docker Compose service with custom service configuration */
-    publishAsDockerComposeService(configure: (arg1: DockerComposeServiceResource, arg2: Service) => Promise<void>): ComputeResourcePromise {
-        return new ComputeResourcePromise(this._promise.then(obj => obj.publishAsDockerComposeService(configure)));
-    }
-
 }
 
 // ============================================================================
@@ -30253,7 +27266,7 @@ export class ContainerFilesDestinationResource extends ResourceBuilderBase<ICont
     private async _publishWithContainerFilesInternal(source: ResourceBuilderBase, destinationPath: string): Promise<ContainerFilesDestinationResource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, source, destinationPath };
         const result = await this._client.invokeCapability<IContainerFilesDestinationResourceHandle>(
-            'Aspire.Hosting/publishWithContainerFiles',
+            'Aspire.Hosting/publishWithContainerFilesFromResource',
             rpcArgs
         );
         return new ContainerFilesDestinationResource(result, this._client);
@@ -30366,6 +27379,26 @@ export class Resource extends ResourceBuilderBase<IResourceHandle> {
     /** Customizes displayed URLs via callback */
     withUrlsCallback(callback: (obj: ResourceUrlsCallbackContext) => Promise<void>): ResourcePromise {
         return new ResourcePromise(this._withUrlsCallbackInternal(callback));
+    }
+
+    /** @internal */
+    private async _withUrlsCallbackAsyncInternal(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): Promise<Resource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as ResourceUrlsCallbackContextHandle;
+            const arg = new ResourceUrlsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<IResourceHandle>(
+            'Aspire.Hosting/withUrlsCallbackAsync',
+            rpcArgs
+        );
+        return new Resource(result, this._client);
+    }
+
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ResourcePromise {
+        return new ResourcePromise(this._withUrlsCallbackAsyncInternal(callback));
     }
 
     /** @internal */
@@ -30489,10 +27522,25 @@ export class Resource extends ResourceBuilderBase<IResourceHandle> {
     }
 
     /** @internal */
+    private async _withRelationshipInternal(resourceBuilder: ResourceBuilderBase, type: string): Promise<Resource> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, resourceBuilder, type };
+        const result = await this._client.invokeCapability<IResourceHandle>(
+            'Aspire.Hosting/withBuilderRelationship',
+            rpcArgs
+        );
+        return new Resource(result, this._client);
+    }
+
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ResourcePromise {
+        return new ResourcePromise(this._withRelationshipInternal(resourceBuilder, type));
+    }
+
+    /** @internal */
     private async _withParentRelationshipInternal(parent: ResourceBuilderBase): Promise<Resource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, parent };
         const result = await this._client.invokeCapability<IResourceHandle>(
-            'Aspire.Hosting/withParentRelationship',
+            'Aspire.Hosting/withBuilderParentRelationship',
             rpcArgs
         );
         return new Resource(result, this._client);
@@ -30507,7 +27555,7 @@ export class Resource extends ResourceBuilderBase<IResourceHandle> {
     private async _withChildRelationshipInternal(child: ResourceBuilderBase): Promise<Resource> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, child };
         const result = await this._client.invokeCapability<IResourceHandle>(
-            'Aspire.Hosting/withChildRelationship',
+            'Aspire.Hosting/withBuilderChildRelationship',
             rpcArgs
         );
         return new Resource(result, this._client);
@@ -30576,6 +27624,26 @@ export class Resource extends ResourceBuilderBase<IResourceHandle> {
         const tags = options?.tags;
         const description = options?.description;
         return new ResourcePromise(this._withPipelineStepFactoryInternal(stepName, callback, dependsOn, requiredBy, tags, description));
+    }
+
+    /** @internal */
+    private async _withPipelineConfigurationAsyncInternal(callback: (arg: PipelineConfigurationContext) => Promise<void>): Promise<Resource> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as PipelineConfigurationContextHandle;
+            const arg = new PipelineConfigurationContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<IResourceHandle>(
+            'Aspire.Hosting/withPipelineConfigurationAsync',
+            rpcArgs
+        );
+        return new Resource(result, this._client);
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ResourcePromise {
+        return new ResourcePromise(this._withPipelineConfigurationAsyncInternal(callback));
     }
 
     /** @internal */
@@ -30697,24 +27765,8 @@ export class Resource extends ResourceBuilderBase<IResourceHandle> {
         return new Resource(result, this._client);
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ResourcePromise {
         return new ResourcePromise(this._publishToDokployInternal(environmentBuilder));
-    }
-
-    /** @internal */
-    private async _publishToDokployWithOptionsInternal(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): Promise<Resource> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, environmentBuilder, options };
-        const result = await this._client.invokeCapability<IResourceHandle>(
-            'Ridder.Hosting.Dokploy/publishToDokployWithOptions',
-            rpcArgs
-        );
-        return new Resource(result, this._client);
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ResourcePromise {
-        return new ResourcePromise(this._publishToDokployWithOptionsInternal(environmentBuilder, options));
     }
 
 }
@@ -30754,6 +27806,11 @@ export class ResourcePromise implements PromiseLike<Resource> {
         return new ResourcePromise(this._promise.then(obj => obj.withUrlsCallback(callback)));
     }
 
+    /** Customizes displayed URLs via async callback */
+    withUrlsCallbackAsync(callback: (arg: ResourceUrlsCallbackContext) => Promise<void>): ResourcePromise {
+        return new ResourcePromise(this._promise.then(obj => obj.withUrlsCallbackAsync(callback)));
+    }
+
     /** Adds or modifies displayed URLs */
     withUrl(url: string, options?: WithUrlOptions): ResourcePromise {
         return new ResourcePromise(this._promise.then(obj => obj.withUrl(url, options)));
@@ -30789,6 +27846,11 @@ export class ResourcePromise implements PromiseLike<Resource> {
         return new ResourcePromise(this._promise.then(obj => obj.withCommand(name, displayName, executeCommand, options)));
     }
 
+    /** Adds a relationship to another resource */
+    withRelationship(resourceBuilder: ResourceBuilderBase, type: string): ResourcePromise {
+        return new ResourcePromise(this._promise.then(obj => obj.withRelationship(resourceBuilder, type)));
+    }
+
     /** Sets the parent relationship */
     withParentRelationship(parent: ResourceBuilderBase): ResourcePromise {
         return new ResourcePromise(this._promise.then(obj => obj.withParentRelationship(parent)));
@@ -30812,6 +27874,11 @@ export class ResourcePromise implements PromiseLike<Resource> {
     /** Adds a pipeline step to the resource */
     withPipelineStepFactory(stepName: string, callback: (arg: PipelineStepContext) => Promise<void>, options?: WithPipelineStepFactoryOptions): ResourcePromise {
         return new ResourcePromise(this._promise.then(obj => obj.withPipelineStepFactory(stepName, callback, options)));
+    }
+
+    /** Configures pipeline step dependencies via an async callback */
+    withPipelineConfigurationAsync(callback: (arg: PipelineConfigurationContext) => Promise<void>): ResourcePromise {
+        return new ResourcePromise(this._promise.then(obj => obj.withPipelineConfigurationAsync(callback)));
     }
 
     /** Configures pipeline step dependencies via a callback */
@@ -30844,14 +27911,8 @@ export class ResourcePromise implements PromiseLike<Resource> {
         return new ResourcePromise(this._promise.then(obj => obj.onResourceReady(callback)));
     }
 
-    /** Publishes a compute resource to Dokploy */
     publishToDokploy(environmentBuilder: DokployProjectEnvironmentResource): ResourcePromise {
         return new ResourcePromise(this._promise.then(obj => obj.publishToDokploy(environmentBuilder)));
-    }
-
-    /** Publishes a compute resource to Dokploy with explicit options */
-    publishToDokployWithOptions(environmentBuilder: DokployProjectEnvironmentResource, options: DokployApplicationOptions): ResourcePromise {
-        return new ResourcePromise(this._promise.then(obj => obj.publishToDokployWithOptions(environmentBuilder, options)));
     }
 
 }
@@ -30900,6 +27961,26 @@ export class ResourceWithArgs extends ResourceBuilderBase<IResourceWithArgsHandl
         return new ResourceWithArgsPromise(this._withArgsCallbackInternal(callback));
     }
 
+    /** @internal */
+    private async _withArgsCallbackAsyncInternal(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): Promise<ResourceWithArgs> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as CommandLineArgsCallbackContextHandle;
+            const arg = new CommandLineArgsCallbackContext(argHandle, this._client);
+            await callback(arg);
+        });
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
+        const result = await this._client.invokeCapability<IResourceWithArgsHandle>(
+            'Aspire.Hosting/withArgsCallbackAsync',
+            rpcArgs
+        );
+        return new ResourceWithArgs(result, this._client);
+    }
+
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): ResourceWithArgsPromise {
+        return new ResourceWithArgsPromise(this._withArgsCallbackAsyncInternal(callback));
+    }
+
 }
 
 /**
@@ -30927,6 +28008,11 @@ export class ResourceWithArgsPromise implements PromiseLike<ResourceWithArgs> {
         return new ResourceWithArgsPromise(this._promise.then(obj => obj.withArgsCallback(callback)));
     }
 
+    /** Sets command-line arguments via async callback */
+    withArgsCallbackAsync(callback: (arg: CommandLineArgsCallbackContext) => Promise<void>): ResourceWithArgsPromise {
+        return new ResourceWithArgsPromise(this._promise.then(obj => obj.withArgsCallbackAsync(callback)));
+    }
+
 }
 
 // ============================================================================
@@ -30939,7 +28025,7 @@ export class ResourceWithConnectionString extends ResourceBuilderBase<IResourceW
     }
 
     /** @internal */
-    private async _withConnectionPropertyInternal(name: string, value: ReferenceExpression): Promise<ResourceWithConnectionString> {
+    private async _withConnectionPropertyInternal(name: string, value: string | ReferenceExpression): Promise<ResourceWithConnectionString> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
         const result = await this._client.invokeCapability<IResourceWithConnectionStringHandle>(
             'Aspire.Hosting/withConnectionProperty',
@@ -30948,8 +28034,8 @@ export class ResourceWithConnectionString extends ResourceBuilderBase<IResourceW
         return new ResourceWithConnectionString(result, this._client);
     }
 
-    /** Adds a connection property with a reference expression */
-    withConnectionProperty(name: string, value: ReferenceExpression): ResourceWithConnectionStringPromise {
+    /** Adds a connection property with a string or reference expression value */
+    withConnectionProperty(name: string, value: string | ReferenceExpression): ResourceWithConnectionStringPromise {
         return new ResourceWithConnectionStringPromise(this._withConnectionPropertyInternal(name, value));
     }
 
@@ -30966,6 +28052,15 @@ export class ResourceWithConnectionString extends ResourceBuilderBase<IResourceW
     /** Adds a connection property with a string value */
     withConnectionPropertyValue(name: string, value: string): ResourceWithConnectionStringPromise {
         return new ResourceWithConnectionStringPromise(this._withConnectionPropertyValueInternal(name, value));
+    }
+
+    /** Gets a connection property by key */
+    async getConnectionProperty(key: string): Promise<ReferenceExpression> {
+        const rpcArgs: Record<string, unknown> = { resource: this._handle, key };
+        return await this._client.invokeCapability<ReferenceExpression>(
+            'Aspire.Hosting/getConnectionProperty',
+            rpcArgs
+        );
     }
 
     /** @internal */
@@ -31005,14 +28100,19 @@ export class ResourceWithConnectionStringPromise implements PromiseLike<Resource
         return this._promise.then(onfulfilled, onrejected);
     }
 
-    /** Adds a connection property with a reference expression */
-    withConnectionProperty(name: string, value: ReferenceExpression): ResourceWithConnectionStringPromise {
+    /** Adds a connection property with a string or reference expression value */
+    withConnectionProperty(name: string, value: string | ReferenceExpression): ResourceWithConnectionStringPromise {
         return new ResourceWithConnectionStringPromise(this._promise.then(obj => obj.withConnectionProperty(name, value)));
     }
 
     /** Adds a connection property with a string value */
     withConnectionPropertyValue(name: string, value: string): ResourceWithConnectionStringPromise {
         return new ResourceWithConnectionStringPromise(this._promise.then(obj => obj.withConnectionPropertyValue(name, value)));
+    }
+
+    /** Gets a connection property by key */
+    getConnectionProperty(key: string): Promise<ReferenceExpression> {
+        return this._promise.then(obj => obj.getConnectionProperty(key));
     }
 
     /** Subscribes to the ConnectionStringAvailable event */
@@ -31442,41 +28542,11 @@ export class ResourceWithEnvironment extends ResourceBuilderBase<IResourceWithEn
     }
 
     /** @internal */
-    private async _withEnvironmentInternal(name: string, value: string): Promise<ResourceWithEnvironment> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<IResourceWithEnvironmentHandle>(
-            'Aspire.Hosting/withEnvironment',
-            rpcArgs
-        );
-        return new ResourceWithEnvironment(result, this._client);
-    }
-
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): ResourceWithEnvironmentPromise {
-        return new ResourceWithEnvironmentPromise(this._withEnvironmentInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentExpressionInternal(name: string, value: ReferenceExpression): Promise<ResourceWithEnvironment> {
-        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
-        const result = await this._client.invokeCapability<IResourceWithEnvironmentHandle>(
-            'Aspire.Hosting/withEnvironmentExpression',
-            rpcArgs
-        );
-        return new ResourceWithEnvironment(result, this._client);
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): ResourceWithEnvironmentPromise {
-        return new ResourceWithEnvironmentPromise(this._withEnvironmentExpressionInternal(name, value));
-    }
-
-    /** @internal */
-    private async _withEnvironmentCallbackInternal(callback: (obj: EnvironmentCallbackContext) => Promise<void>): Promise<ResourceWithEnvironment> {
-        const callbackId = registerCallback(async (objData: unknown) => {
-            const objHandle = wrapIfHandle(objData) as EnvironmentCallbackContextHandle;
-            const obj = new EnvironmentCallbackContext(objHandle, this._client);
-            await callback(obj);
+    private async _withEnvironmentCallbackInternal(callback: (arg: EnvironmentCallbackContext) => Promise<void>): Promise<ResourceWithEnvironment> {
+        const callbackId = registerCallback(async (argData: unknown) => {
+            const argHandle = wrapIfHandle(argData) as EnvironmentCallbackContextHandle;
+            const arg = new EnvironmentCallbackContext(argHandle, this._client);
+            await callback(arg);
         });
         const rpcArgs: Record<string, unknown> = { builder: this._handle, callback: callbackId };
         const result = await this._client.invokeCapability<IResourceWithEnvironmentHandle>(
@@ -31487,7 +28557,7 @@ export class ResourceWithEnvironment extends ResourceBuilderBase<IResourceWithEn
     }
 
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): ResourceWithEnvironmentPromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): ResourceWithEnvironmentPromise {
         return new ResourceWithEnvironmentPromise(this._withEnvironmentCallbackInternal(callback));
     }
 
@@ -31504,6 +28574,21 @@ export class ResourceWithEnvironment extends ResourceBuilderBase<IResourceWithEn
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): ResourceWithEnvironmentPromise {
         return new ResourceWithEnvironmentPromise(this._withEnvironmentEndpointInternal(name, endpointReference));
+    }
+
+    /** @internal */
+    private async _withEnvironmentInternal(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): Promise<ResourceWithEnvironment> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, name, value };
+        const result = await this._client.invokeCapability<IResourceWithEnvironmentHandle>(
+            'Aspire.Hosting/withEnvironment',
+            rpcArgs
+        );
+        return new ResourceWithEnvironment(result, this._client);
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): ResourceWithEnvironmentPromise {
+        return new ResourceWithEnvironmentPromise(this._withEnvironmentInternal(name, value));
     }
 
     /** @internal */
@@ -31534,6 +28619,21 @@ export class ResourceWithEnvironment extends ResourceBuilderBase<IResourceWithEn
     /** Sets an environment variable from a connection string resource */
     withEnvironmentConnectionString(envVarName: string, resource: ResourceBuilderBase): ResourceWithEnvironmentPromise {
         return new ResourceWithEnvironmentPromise(this._withEnvironmentConnectionStringInternal(envVarName, resource));
+    }
+
+    /** @internal */
+    private async _withReferenceEnvironmentInternal(options: ReferenceEnvironmentInjectionOptions): Promise<ResourceWithEnvironment> {
+        const rpcArgs: Record<string, unknown> = { builder: this._handle, options };
+        const result = await this._client.invokeCapability<IResourceWithEnvironmentHandle>(
+            'Aspire.Hosting/withReferenceEnvironment',
+            rpcArgs
+        );
+        return new ResourceWithEnvironment(result, this._client);
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): ResourceWithEnvironmentPromise {
+        return new ResourceWithEnvironmentPromise(this._withReferenceEnvironmentInternal(options));
     }
 
     /** @internal */
@@ -31637,7 +28737,7 @@ export class ResourceWithEnvironment extends ResourceBuilderBase<IResourceWithEn
         const rpcArgs: Record<string, unknown> = { builder: this._handle };
         if (password !== undefined) rpcArgs.password = password;
         const result = await this._client.invokeCapability<IResourceWithEnvironmentHandle>(
-            'Aspire.Hosting/withHttpsDeveloperCertificate',
+            'Aspire.Hosting/withParameterHttpsDeveloperCertificate',
             rpcArgs
         );
         return new ResourceWithEnvironment(result, this._client);
@@ -31691,24 +28791,19 @@ export class ResourceWithEnvironmentPromise implements PromiseLike<ResourceWithE
         return new ResourceWithEnvironmentPromise(this._promise.then(obj => obj.withOtlpExporterProtocol(protocol)));
     }
 
-    /** Sets an environment variable */
-    withEnvironment(name: string, value: string): ResourceWithEnvironmentPromise {
-        return new ResourceWithEnvironmentPromise(this._promise.then(obj => obj.withEnvironment(name, value)));
-    }
-
-    /** Adds an environment variable with a reference expression */
-    withEnvironmentExpression(name: string, value: ReferenceExpression): ResourceWithEnvironmentPromise {
-        return new ResourceWithEnvironmentPromise(this._promise.then(obj => obj.withEnvironmentExpression(name, value)));
-    }
-
     /** Sets environment variables via callback */
-    withEnvironmentCallback(callback: (obj: EnvironmentCallbackContext) => Promise<void>): ResourceWithEnvironmentPromise {
+    withEnvironmentCallback(callback: (arg: EnvironmentCallbackContext) => Promise<void>): ResourceWithEnvironmentPromise {
         return new ResourceWithEnvironmentPromise(this._promise.then(obj => obj.withEnvironmentCallback(callback)));
     }
 
     /** Sets an environment variable from an endpoint reference */
     withEnvironmentEndpoint(name: string, endpointReference: EndpointReference): ResourceWithEnvironmentPromise {
         return new ResourceWithEnvironmentPromise(this._promise.then(obj => obj.withEnvironmentEndpoint(name, endpointReference)));
+    }
+
+    /** Sets an environment variable on the resource */
+    withEnvironment(name: string, value: string | ReferenceExpression | EndpointReference | ParameterResource | ResourceWithConnectionString): ResourceWithEnvironmentPromise {
+        return new ResourceWithEnvironmentPromise(this._promise.then(obj => obj.withEnvironment(name, value)));
     }
 
     /** Sets an environment variable from a parameter resource */
@@ -31719,6 +28814,11 @@ export class ResourceWithEnvironmentPromise implements PromiseLike<ResourceWithE
     /** Sets an environment variable from a connection string resource */
     withEnvironmentConnectionString(envVarName: string, resource: ResourceBuilderBase): ResourceWithEnvironmentPromise {
         return new ResourceWithEnvironmentPromise(this._promise.then(obj => obj.withEnvironmentConnectionString(envVarName, resource)));
+    }
+
+    /** Configures which reference values are injected into environment variables */
+    withReferenceEnvironment(options: ReferenceEnvironmentInjectionOptions): ResourceWithEnvironmentPromise {
+        return new ResourceWithEnvironmentPromise(this._promise.then(obj => obj.withReferenceEnvironment(options)));
     }
 
     /** Adds a reference to another resource */
@@ -31776,7 +28876,7 @@ export class ResourceWithWaitSupport extends ResourceBuilderBase<IResourceWithWa
     private async _waitForInternal(dependency: ResourceBuilderBase): Promise<ResourceWithWaitSupport> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<IResourceWithWaitSupportHandle>(
-            'Aspire.Hosting/waitFor',
+            'Aspire.Hosting/waitForResource',
             rpcArgs
         );
         return new ResourceWithWaitSupport(result, this._client);
@@ -31806,7 +28906,7 @@ export class ResourceWithWaitSupport extends ResourceBuilderBase<IResourceWithWa
     private async _waitForStartInternal(dependency: ResourceBuilderBase): Promise<ResourceWithWaitSupport> {
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         const result = await this._client.invokeCapability<IResourceWithWaitSupportHandle>(
-            'Aspire.Hosting/waitForStart',
+            'Aspire.Hosting/waitForResourceStart',
             rpcArgs
         );
         return new ResourceWithWaitSupport(result, this._client);
@@ -31837,7 +28937,7 @@ export class ResourceWithWaitSupport extends ResourceBuilderBase<IResourceWithWa
         const rpcArgs: Record<string, unknown> = { builder: this._handle, dependency };
         if (exitCode !== undefined) rpcArgs.exitCode = exitCode;
         const result = await this._client.invokeCapability<IResourceWithWaitSupportHandle>(
-            'Aspire.Hosting/waitForCompletion',
+            'Aspire.Hosting/waitForResourceCompletion',
             rpcArgs
         );
         return new ResourceWithWaitSupport(result, this._client);
@@ -32032,7 +29132,6 @@ registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ApplicationModel.ResourceNo
 registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ApplicationModel.ResourceReadyEvent', (handle, client) => new ResourceReadyEvent(handle as ResourceReadyEventHandle, client));
 registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ApplicationModel.ResourceStoppedEvent', (handle, client) => new ResourceStoppedEvent(handle as ResourceStoppedEventHandle, client));
 registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ApplicationModel.ResourceUrlsCallbackContext', (handle, client) => new ResourceUrlsCallbackContext(handle as ResourceUrlsCallbackContextHandle, client));
-registerHandleWrapper('Aspire.Hosting.Docker/Aspire.Hosting.Docker.Resources.ComposeNodes.Service', (handle, client) => new Service(handle as ServiceHandle, client));
 registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ApplicationModel.UpdateCommandStateContext', (handle, client) => new UpdateCommandStateContext(handle as UpdateCommandStateContextHandle, client));
 registerHandleWrapper('Microsoft.Extensions.Configuration.Abstractions/Microsoft.Extensions.Configuration.IConfiguration', (handle, client) => new Configuration(handle as IConfigurationHandle, client));
 registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.IDistributedApplicationBuilder', (handle, client) => new DistributedApplicationBuilder(handle as IDistributedApplicationBuilderHandle, client));
@@ -32048,9 +29147,6 @@ registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ConnectionStringResource', 
 registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ApplicationModel.ContainerRegistryResource', (handle, client) => new ContainerRegistryResource(handle as ContainerRegistryResourceHandle, client));
 registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ApplicationModel.ContainerResource', (handle, client) => new ContainerResource(handle as ContainerResourceHandle, client));
 registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ApplicationModel.CSharpAppResource', (handle, client) => new CSharpAppResource(handle as CSharpAppResourceHandle, client));
-registerHandleWrapper('Aspire.Hosting.Docker/Aspire.Hosting.Docker.DockerComposeAspireDashboardResource', (handle, client) => new DockerComposeAspireDashboardResource(handle as DockerComposeAspireDashboardResourceHandle, client));
-registerHandleWrapper('Aspire.Hosting.Docker/Aspire.Hosting.Docker.DockerComposeEnvironmentResource', (handle, client) => new DockerComposeEnvironmentResource(handle as DockerComposeEnvironmentResourceHandle, client));
-registerHandleWrapper('Aspire.Hosting.Docker/Aspire.Hosting.Docker.DockerComposeServiceResource', (handle, client) => new DockerComposeServiceResource(handle as DockerComposeServiceResourceHandle, client));
 registerHandleWrapper('Ridder.Hosting.Dokploy/Ridder.Hosting.Dokploy.DokployProjectEnvironmentResource', (handle, client) => new DokployProjectEnvironmentResource(handle as DokployProjectEnvironmentResourceHandle, client));
 registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ApplicationModel.DotnetToolResource', (handle, client) => new DotnetToolResource(handle as DotnetToolResourceHandle, client));
 registerHandleWrapper('Aspire.Hosting/Aspire.Hosting.ApplicationModel.ExecutableResource', (handle, client) => new ExecutableResource(handle as ExecutableResourceHandle, client));

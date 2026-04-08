@@ -25,7 +25,7 @@ public static class DokployExtensions
     /// <param name="builder">The distributed application builder.</param>
     /// <param name="name">The logical name of the Dokploy environment.</param>
     /// <returns>A resource builder for configuring the Dokploy environment.</returns>
-    [AspireExport("addDokployEnvironment", Description = "Adds a Dokploy environment resource")]
+    [AspireExport("addDokployEnvironment")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> AddDokployEnvironment(this IDistributedApplicationBuilder builder, [ResourceName] string name)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -92,7 +92,7 @@ public static class DokployExtensions
     /// </summary>
     /// <param name="builder">The Dokploy environment builder.</param>
     /// <returns>The same builder instance for chaining.</returns>
-    [AspireExport("withSelfHostedRegistry", Description = "Configures a Dokploy-hosted container registry")]
+    [AspireExport("withSelfHostedRegistry")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> WithSelfHostedRegistry(this IResourceBuilder<DokployProjectEnvironmentResource> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -116,7 +116,7 @@ public static class DokployExtensions
     /// <param name="builder">The Dokploy environment builder.</param>
     /// <param name="registryDomainUrl">The external registry domain used by Dokploy to host images.</param>
     /// <returns>The same builder instance for chaining.</returns>
-    [AspireExport("withSelfHostedRegistryDomain", Description = "Configures a Dokploy-hosted registry with explicit domain")]
+    [AspireExportIgnore(Reason = "Use withSelfHostedRegistry() in TypeScript AppHosts. This explicit domain overload remains .NET-only for now.")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> WithSelfHostedRegistry(this IResourceBuilder<DokployProjectEnvironmentResource> builder, string registryDomainUrl)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -137,7 +137,7 @@ public static class DokployExtensions
     /// </summary>
     /// <param name="builder">The Dokploy environment builder.</param>
     /// <returns>The same builder instance for chaining.</returns>
-    [AspireExport("withHostedRegistry", Description = "Configures an external hosted container registry")]
+    [AspireExport("withHostedRegistry")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> WithHostedRegistry(this IResourceBuilder<DokployProjectEnvironmentResource> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -173,7 +173,7 @@ public static class DokployExtensions
     /// <param name="username">The username used to push images to the registry.</param>
     /// <param name="password">The password used to push images to the registry.</param>
     /// <returns>The same builder instance for chaining.</returns>
-    [AspireExport("withHostedRegistryCredentials", Description = "Configures an external hosted registry with explicit credentials")]
+    [AspireExportIgnore(Reason = "Use withHostedRegistry() in TypeScript AppHosts. This credential overload remains .NET-only for now.")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> WithHostedRegistry(this IResourceBuilder<DokployProjectEnvironmentResource> builder, string registryUrl, string username, string password)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -205,7 +205,7 @@ public static class DokployExtensions
     /// <param name="builder">The compute resource builder.</param>
     /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
     /// <returns>The same builder instance for chaining.</returns>
-    [AspireExport("publishToDokploy", Description = "Publishes a compute resource to Dokploy")]
+    [AspireExport("publishToDokploy")]
     public static IResourceBuilder<T> PublishToDokploy<T>(this IResourceBuilder<T> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder)
         where T : IResource, IComputeResource
     {
@@ -247,6 +247,64 @@ public static class DokployExtensions
     }
 
     /// <summary>
+    /// Publishes a project resource to Dokploy using the default Dokploy application options.
+    /// </summary>
+    /// <param name="builder">The project resource builder.</param>
+    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
+    /// <returns>The same builder instance for chaining.</returns>
+    [AspireExportIgnore(Reason = "Use publishToDokploy(environment) instead.")]
+    public static IResourceBuilder<ProjectResource> PublishProjectToDokploy(this IResourceBuilder<ProjectResource> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder)
+    {
+        return PublishToDokploy(builder, environmentBuilder);
+    }
+
+    /// <summary>
+    /// Publishes a Redis resource to Dokploy using the default Dokploy application options.
+    /// </summary>
+    /// <param name="builder">The Redis resource builder.</param>
+    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
+    /// <returns>The same builder instance for chaining.</returns>
+    [AspireExportIgnore(Reason = "Use publishToDokploy(environment) instead.")]
+    public static IResourceBuilder<RedisResource> PublishRedisToDokploy(this IResourceBuilder<RedisResource> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder)
+    {
+        return PublishToDokploy(builder, environmentBuilder);
+    }
+
+    /// <summary>
+    /// Publishes a project resource to Dokploy using a TypeScript AppHost-safe builder API.
+    /// </summary>
+    /// <param name="builder">The distributed application builder.</param>
+    /// <param name="resourceBuilder">The project resource to publish.</param>
+    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
+    /// <returns>The same project resource builder for chaining.</returns>
+    [AspireExportIgnore(Reason = "Legacy TypeScript shim. Use resource.publishToDokploy(environment) instead.")]
+    public static IResourceBuilder<ProjectResource> PublishProjectToDokployFromBuilder(this IDistributedApplicationBuilder builder, IResourceBuilder<ProjectResource> resourceBuilder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(resourceBuilder);
+        ArgumentNullException.ThrowIfNull(environmentBuilder);
+
+        return resourceBuilder.PublishToDokploy(environmentBuilder);
+    }
+
+    /// <summary>
+    /// Publishes a Redis resource to Dokploy using a TypeScript AppHost-safe builder API.
+    /// </summary>
+    /// <param name="builder">The distributed application builder.</param>
+    /// <param name="resourceBuilder">The Redis resource to publish.</param>
+    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
+    /// <returns>The same Redis resource builder for chaining.</returns>
+    [AspireExportIgnore(Reason = "Legacy TypeScript shim. Use resource.publishToDokploy(environment) instead.")]
+    public static IResourceBuilder<RedisResource> PublishRedisToDokployFromBuilder(this IDistributedApplicationBuilder builder, IResourceBuilder<RedisResource> resourceBuilder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(resourceBuilder);
+        ArgumentNullException.ThrowIfNull(environmentBuilder);
+
+        return resourceBuilder.PublishToDokploy(environmentBuilder);
+    }
+
+    /// <summary>
     /// Publishes a compute resource to Dokploy with explicit application options.
     /// </summary>
     /// <typeparam name="T">The resource type.</typeparam>
@@ -254,7 +312,7 @@ public static class DokployExtensions
     /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
     /// <param name="options">The Dokploy application options for the resource.</param>
     /// <returns>The same builder instance for chaining.</returns>
-    [AspireExport("publishToDokployWithOptions", Description = "Publishes a compute resource to Dokploy with explicit options")]
+    [AspireExportIgnore(Reason = "Generic ATS export is not compatible with current TypeScript code generation. Use concrete resource overloads.")]
     public static IResourceBuilder<T> PublishToDokploy<T>(this IResourceBuilder<T> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder, DokployApplicationOptions options)
         where T : IResource, IComputeResource
     {
@@ -269,6 +327,32 @@ public static class DokployExtensions
             o.ConfigureMounts = options.ConfigureMounts;
             o.CreateDomainsForExternalEndpoints = options.CreateDomainsForExternalEndpoints;
         });
+    }
+
+    /// <summary>
+    /// Publishes a project resource to Dokploy with explicit application options.
+    /// </summary>
+    /// <param name="builder">The project resource builder.</param>
+    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
+    /// <param name="options">The Dokploy application options for the resource.</param>
+    /// <returns>The same builder instance for chaining.</returns>
+    [AspireExportIgnore(Reason = "Custom options DTO is not compatible with current TypeScript code generation.")]
+    public static IResourceBuilder<ProjectResource> PublishProjectToDokployWithOptions(this IResourceBuilder<ProjectResource> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder, DokployApplicationOptions options)
+    {
+        return PublishToDokploy(builder, environmentBuilder, options);
+    }
+
+    /// <summary>
+    /// Publishes a Redis resource to Dokploy with explicit application options.
+    /// </summary>
+    /// <param name="builder">The Redis resource builder.</param>
+    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
+    /// <param name="options">The Dokploy application options for the resource.</param>
+    /// <returns>The same builder instance for chaining.</returns>
+    [AspireExportIgnore(Reason = "Custom options DTO is not compatible with current TypeScript code generation.")]
+    public static IResourceBuilder<RedisResource> PublishRedisToDokployWithOptions(this IResourceBuilder<RedisResource> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder, DokployApplicationOptions options)
+    {
+        return PublishToDokploy(builder, environmentBuilder, options);
     }
 
     /// <summary>
@@ -320,7 +404,7 @@ public static class DokployExtensions
     /// <param name="builder">The distributed application builder.</param>
     /// <param name="name">The logical name of the Dokploy environment.</param>
     /// <returns>A resource builder for configuring the Dokploy environment.</returns>
-    [AspireExportIgnore(Reason = "Legacy. Use addDokployEnvironment + withHostedRegistry.")]
+    [AspireExportIgnore(Reason = "Legacy TypeScript shim. Use addDokployEnvironment(name).withHostedRegistry() instead.")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> AddDokployProjectHostedRegistry(this IDistributedApplicationBuilder builder, string name)
     {
         return builder.AddDokployEnvironment(name).WithHostedRegistry();

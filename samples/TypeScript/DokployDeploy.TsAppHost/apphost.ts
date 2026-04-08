@@ -10,6 +10,7 @@ const dokploy = await builder
   .addDokployEnvironment("my-env")
   .withHostedRegistry();
 
+
 // Add Redis cache with a data volume
 const cache = await builder
   .addRedis("cache")
@@ -27,7 +28,7 @@ const api = await builder
   })
   .publishToDokploy(dokploy);
 
-// Add the Vite frontend and publish it to Dokploy
+// Add the Vite frontend, wire it to the API, and publish it to Dokploy
 const frontend = await builder
   .addViteApp("frontend", "../DokployDeploy.Frontend")
   .withExternalHttpEndpoints()

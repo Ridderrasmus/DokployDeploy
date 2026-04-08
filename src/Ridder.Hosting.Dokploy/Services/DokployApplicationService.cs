@@ -1,6 +1,5 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using Aspire.Hosting.Docker;
 using Microsoft.Extensions.Logging;
 using Ridder.Hosting.Dokploy.Models;
 using Ridder.Hosting.Dokploy.Utilities;
@@ -124,7 +123,7 @@ internal sealed class DokployApplicationService
 
         string? dockerImage = null;
 
-        if (rsc.TryGetLastAnnotation<DockerfileBuildAnnotation>(out _) || rsc is ProjectResource)
+        if (HasDockerfileBuildAnnotation(rsc) || rsc is ProjectResource)
         {
             var imageRef = new ContainerImageReference(rsc);
             dockerImage = await ((IValueProvider)imageRef).GetValueAsync();
@@ -184,6 +183,12 @@ internal sealed class DokployApplicationService
         using var deployResponse = await _client.Http.PostAsync("api/application.deploy", DokployApiClient.CreateJsonContent(deployBody));
         deployResponse.EnsureSuccessStatusCode();
         _client.Logger.LogInformation("Triggered application deploy for {AppName}.", rsc.Name);
+    }
+
+    private static bool HasDockerfileBuildAnnotation(IResource resource)
+    {
+        return resource.Annotations.Any(annotation =>
+            string.Equals(annotation.GetType().Name, "DockerfileBuildAnnotation", StringComparison.Ordinal));
     }
 
     private async Task SaveApplicationEnvironmentAsync(
