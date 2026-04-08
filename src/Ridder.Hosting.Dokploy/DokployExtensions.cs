@@ -246,63 +246,6 @@ public static class DokployExtensions
         return builder;
     }
 
-    /// <summary>
-    /// Publishes a project resource to Dokploy using the default Dokploy application options.
-    /// </summary>
-    /// <param name="builder">The project resource builder.</param>
-    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
-    /// <returns>The same builder instance for chaining.</returns>
-    [AspireExportIgnore(Reason = "Use publishToDokploy(environment) instead.")]
-    public static IResourceBuilder<ProjectResource> PublishProjectToDokploy(this IResourceBuilder<ProjectResource> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder)
-    {
-        return PublishToDokploy(builder, environmentBuilder);
-    }
-
-    /// <summary>
-    /// Publishes a Redis resource to Dokploy using the default Dokploy application options.
-    /// </summary>
-    /// <param name="builder">The Redis resource builder.</param>
-    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
-    /// <returns>The same builder instance for chaining.</returns>
-    [AspireExportIgnore(Reason = "Use publishToDokploy(environment) instead.")]
-    public static IResourceBuilder<RedisResource> PublishRedisToDokploy(this IResourceBuilder<RedisResource> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder)
-    {
-        return PublishToDokploy(builder, environmentBuilder);
-    }
-
-    /// <summary>
-    /// Publishes a project resource to Dokploy using a TypeScript AppHost-safe builder API.
-    /// </summary>
-    /// <param name="builder">The distributed application builder.</param>
-    /// <param name="resourceBuilder">The project resource to publish.</param>
-    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
-    /// <returns>The same project resource builder for chaining.</returns>
-    [AspireExportIgnore(Reason = "Legacy TypeScript shim. Use resource.publishToDokploy(environment) instead.")]
-    public static IResourceBuilder<ProjectResource> PublishProjectToDokployFromBuilder(this IDistributedApplicationBuilder builder, IResourceBuilder<ProjectResource> resourceBuilder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder)
-    {
-        ArgumentNullException.ThrowIfNull(builder);
-        ArgumentNullException.ThrowIfNull(resourceBuilder);
-        ArgumentNullException.ThrowIfNull(environmentBuilder);
-
-        return resourceBuilder.PublishToDokploy(environmentBuilder);
-    }
-
-    /// <summary>
-    /// Publishes a Redis resource to Dokploy using a TypeScript AppHost-safe builder API.
-    /// </summary>
-    /// <param name="builder">The distributed application builder.</param>
-    /// <param name="resourceBuilder">The Redis resource to publish.</param>
-    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
-    /// <returns>The same Redis resource builder for chaining.</returns>
-    [AspireExportIgnore(Reason = "Legacy TypeScript shim. Use resource.publishToDokploy(environment) instead.")]
-    public static IResourceBuilder<RedisResource> PublishRedisToDokployFromBuilder(this IDistributedApplicationBuilder builder, IResourceBuilder<RedisResource> resourceBuilder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder)
-    {
-        ArgumentNullException.ThrowIfNull(builder);
-        ArgumentNullException.ThrowIfNull(resourceBuilder);
-        ArgumentNullException.ThrowIfNull(environmentBuilder);
-
-        return resourceBuilder.PublishToDokploy(environmentBuilder);
-    }
 
     /// <summary>
     /// Publishes a compute resource to Dokploy with explicit application options.
@@ -338,19 +281,6 @@ public static class DokployExtensions
     /// <returns>The same builder instance for chaining.</returns>
     [AspireExportIgnore(Reason = "Custom options DTO is not compatible with current TypeScript code generation.")]
     public static IResourceBuilder<ProjectResource> PublishProjectToDokployWithOptions(this IResourceBuilder<ProjectResource> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder, DokployApplicationOptions options)
-    {
-        return PublishToDokploy(builder, environmentBuilder, options);
-    }
-
-    /// <summary>
-    /// Publishes a Redis resource to Dokploy with explicit application options.
-    /// </summary>
-    /// <param name="builder">The Redis resource builder.</param>
-    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
-    /// <param name="options">The Dokploy application options for the resource.</param>
-    /// <returns>The same builder instance for chaining.</returns>
-    [AspireExportIgnore(Reason = "Custom options DTO is not compatible with current TypeScript code generation.")]
-    public static IResourceBuilder<RedisResource> PublishRedisToDokployWithOptions(this IResourceBuilder<RedisResource> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder, DokployApplicationOptions options)
     {
         return PublishToDokploy(builder, environmentBuilder, options);
     }
