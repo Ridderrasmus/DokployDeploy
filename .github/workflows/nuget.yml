@@ -1,0 +1,97 @@
+name: NuGet
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  PACKAGE_PROJECT: src/Ridder.Hosting.Dokploy/Ridder.Hosting.Dokploy.csproj
+  SOLUTION_FILE: DokployDeploy.slnx
+  PACKAGE_OUTPUT: artifacts/pack
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          include-prerelease: true
+
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION_FILE }} --nologo
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore --nologo
+
+      - name: Test
+        run: dotnet test ${{ env.SOLUTION_FILE }} --configuration Release --no-build --nologo
+
+      - name: Pack
+        run: dotnet pack ${{ env.PACKAGE_PROJECT }} --configuration Release --no-build --nologo --output ${{ env.PACKAGE_OUTPUT }}
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: |
+            ${{ env.PACKAGE_OUTPUT }}/*.nupkg
+            ${{ env.PACKAGE_OUTPUT }}/*.snupkg
+
+  publish:
+    needs: validate
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          include-prerelease: true
+
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION_FILE }} --nologo
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore --nologo
+
+      - name: Test
+        run: dotnet test ${{ env.SOLUTION_FILE }} --configuration Release --no-build --nologo
+
+      - name: Pack release version
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          dotnet pack "${PACKAGE_PROJECT}" \
+            --configuration Release \
+            --no-restore \
+            --nologo \
+            --output "${PACKAGE_OUTPUT}" \
+            -p:Version="${VERSION}"
+
+      - name: Push package
+        run: dotnet nuget push "${{ env.PACKAGE_OUTPUT }}/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
+
+      - name: Push symbols
+        run: dotnet nuget push "${{ env.PACKAGE_OUTPUT }}/*.snupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
