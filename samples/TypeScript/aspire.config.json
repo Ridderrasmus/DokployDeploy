@@ -1,0 +1,24 @@
+{
+  "appHost": {
+    "path": "DokployDeploy.TsAppHost/apphost.ts",
+    "language": "typescript/nodejs"
+  },
+  "sdk": {
+    "version": "13.2.1"
+  },
+  "channel": "staging",
+  "profiles": {
+    "https": {
+      "applicationUrl": "https://localhost:17134;http://localhost:15170",
+      "environmentVariables": {
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21030",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22057"
+      }
+    }
+  },
+  "packages": {
+    "Ridder.Hosting.Dokploy": "../../../src/Ridder.Hosting.Dokploy/Ridder.Hosting.Dokploy.csproj",
+    "Aspire.Hosting.Redis": "13.2.1",
+    "Aspire.Hosting.JavaScript": "13.2.1"
+  }
+}

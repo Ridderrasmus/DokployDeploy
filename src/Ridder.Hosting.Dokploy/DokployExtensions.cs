@@ -25,7 +25,8 @@ public static class DokployExtensions
     /// <param name="builder">The distributed application builder.</param>
     /// <param name="name">The logical name of the Dokploy environment.</param>
     /// <returns>A resource builder for configuring the Dokploy environment.</returns>
-    public static IResourceBuilder<DokployProjectEnvironmentResource> AddDokployEnvironment(this IDistributedApplicationBuilder builder, string name)
+    [AspireExport("addDokployEnvironment")]
+    public static IResourceBuilder<DokployProjectEnvironmentResource> AddDokployEnvironment(this IDistributedApplicationBuilder builder, [ResourceName] string name)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -91,6 +92,7 @@ public static class DokployExtensions
     /// </summary>
     /// <param name="builder">The Dokploy environment builder.</param>
     /// <returns>The same builder instance for chaining.</returns>
+    [AspireExport("withSelfHostedRegistry")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> WithSelfHostedRegistry(this IResourceBuilder<DokployProjectEnvironmentResource> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -114,6 +116,7 @@ public static class DokployExtensions
     /// <param name="builder">The Dokploy environment builder.</param>
     /// <param name="registryDomainUrl">The external registry domain used by Dokploy to host images.</param>
     /// <returns>The same builder instance for chaining.</returns>
+    [AspireExportIgnore(Reason = "Use withSelfHostedRegistry() in TypeScript AppHosts. This explicit domain overload remains .NET-only for now.")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> WithSelfHostedRegistry(this IResourceBuilder<DokployProjectEnvironmentResource> builder, string registryDomainUrl)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -134,6 +137,7 @@ public static class DokployExtensions
     /// </summary>
     /// <param name="builder">The Dokploy environment builder.</param>
     /// <returns>The same builder instance for chaining.</returns>
+    [AspireExport("withHostedRegistry")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> WithHostedRegistry(this IResourceBuilder<DokployProjectEnvironmentResource> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -169,6 +173,7 @@ public static class DokployExtensions
     /// <param name="username">The username used to push images to the registry.</param>
     /// <param name="password">The password used to push images to the registry.</param>
     /// <returns>The same builder instance for chaining.</returns>
+    [AspireExportIgnore(Reason = "Use withHostedRegistry() in TypeScript AppHosts. This credential overload remains .NET-only for now.")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> WithHostedRegistry(this IResourceBuilder<DokployProjectEnvironmentResource> builder, string registryUrl, string username, string password)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -200,6 +205,7 @@ public static class DokployExtensions
     /// <param name="builder">The compute resource builder.</param>
     /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
     /// <returns>The same builder instance for chaining.</returns>
+    [AspireExport("publishToDokploy")]
     public static IResourceBuilder<T> PublishToDokploy<T>(this IResourceBuilder<T> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder)
         where T : IResource, IComputeResource
     {
@@ -214,6 +220,7 @@ public static class DokployExtensions
     /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
     /// <param name="configure">An action that configures Dokploy application options for the resource.</param>
     /// <returns>The same builder instance for chaining.</returns>
+    [AspireExportIgnore(Reason = "Action<T> callback is not ATS-compatible. Use the DokployApplicationOptions overload.")]
     public static IResourceBuilder<T> PublishToDokploy<T>(this IResourceBuilder<T> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder, Action<DokployApplicationOptions> configure)
         where T : IResource, IComputeResource
     {
@@ -239,12 +246,52 @@ public static class DokployExtensions
         return builder;
     }
 
+
+    /// <summary>
+    /// Publishes a compute resource to Dokploy with explicit application options.
+    /// </summary>
+    /// <typeparam name="T">The resource type.</typeparam>
+    /// <param name="builder">The compute resource builder.</param>
+    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
+    /// <param name="options">The Dokploy application options for the resource.</param>
+    /// <returns>The same builder instance for chaining.</returns>
+    [AspireExportIgnore(Reason = "Generic ATS export is not compatible with current TypeScript code generation. Use concrete resource overloads.")]
+    public static IResourceBuilder<T> PublishToDokploy<T>(this IResourceBuilder<T> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder, DokployApplicationOptions options)
+        where T : IResource, IComputeResource
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(environmentBuilder);
+        ArgumentNullException.ThrowIfNull(options);
+
+        return PublishToDokploy(builder, environmentBuilder, o =>
+        {
+            o.ApplicationName = options.ApplicationName;
+            o.ConfigureEnvironmentVariables = options.ConfigureEnvironmentVariables;
+            o.ConfigureMounts = options.ConfigureMounts;
+            o.CreateDomainsForExternalEndpoints = options.CreateDomainsForExternalEndpoints;
+        });
+    }
+
+    /// <summary>
+    /// Publishes a project resource to Dokploy with explicit application options.
+    /// </summary>
+    /// <param name="builder">The project resource builder.</param>
+    /// <param name="environmentBuilder">The Dokploy environment that should provision the resource.</param>
+    /// <param name="options">The Dokploy application options for the resource.</param>
+    /// <returns>The same builder instance for chaining.</returns>
+    [AspireExportIgnore(Reason = "Custom options DTO is not compatible with current TypeScript code generation.")]
+    public static IResourceBuilder<ProjectResource> PublishProjectToDokployWithOptions(this IResourceBuilder<ProjectResource> builder, IResourceBuilder<DokployProjectEnvironmentResource> environmentBuilder, DokployApplicationOptions options)
+    {
+        return PublishToDokploy(builder, environmentBuilder, options);
+    }
+
     /// <summary>
     /// Adds a Dokploy environment using the legacy convenience API and configures it for a Dokploy-hosted registry.
     /// </summary>
     /// <param name="builder">The distributed application builder.</param>
     /// <param name="name">The logical name of the Dokploy environment.</param>
     /// <returns>A resource builder for configuring the Dokploy environment.</returns>
+    [AspireExportIgnore(Reason = "Legacy. Use addDokployEnvironment + withSelfHostedRegistry.")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> AddDokployProject(this IDistributedApplicationBuilder builder, string name)
     {
         return builder.AddDokployEnvironment(name).WithSelfHostedRegistry();
@@ -256,6 +303,7 @@ public static class DokployExtensions
     /// <param name="builder">The distributed application builder.</param>
     /// <param name="name">The logical name of the Dokploy environment.</param>
     /// <returns>A resource builder for configuring the Dokploy environment.</returns>
+    [AspireExportIgnore(Reason = "Legacy. Use addDokployEnvironment + withSelfHostedRegistry.")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> AddDokployProjectSelfHostedRegistry(this IDistributedApplicationBuilder builder, string name)
     {
         return builder.AddDokployEnvironment(name).WithSelfHostedRegistry();
@@ -268,6 +316,7 @@ public static class DokployExtensions
     /// <param name="name">The logical name of the Dokploy environment.</param>
     /// <param name="registryDomainUrl">The external registry domain used by Dokploy to host images.</param>
     /// <returns>A resource builder for configuring the Dokploy environment.</returns>
+    [AspireExportIgnore(Reason = "Legacy. Use addDokployEnvironment + withSelfHostedRegistryDomain.")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> AddDokployProjectSelfHostedRegistry(this IDistributedApplicationBuilder builder, string name, string registryDomainUrl)
     {
         if (string.IsNullOrWhiteSpace(registryDomainUrl))
@@ -285,6 +334,7 @@ public static class DokployExtensions
     /// <param name="builder">The distributed application builder.</param>
     /// <param name="name">The logical name of the Dokploy environment.</param>
     /// <returns>A resource builder for configuring the Dokploy environment.</returns>
+    [AspireExportIgnore(Reason = "Legacy TypeScript shim. Use addDokployEnvironment(name).withHostedRegistry() instead.")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> AddDokployProjectHostedRegistry(this IDistributedApplicationBuilder builder, string name)
     {
         return builder.AddDokployEnvironment(name).WithHostedRegistry();
@@ -300,6 +350,7 @@ public static class DokployExtensions
     /// <param name="username">The username used to push images to the registry.</param>
     /// <param name="password">The password used to push images to the registry.</param>
     /// <returns>A resource builder for configuring the Dokploy environment.</returns>
+    [AspireExportIgnore(Reason = "Legacy. Use addDokployEnvironment + withHostedRegistryCredentials.")]
     public static IResourceBuilder<DokployProjectEnvironmentResource> AddDokployProjectHostedRegistry(this IDistributedApplicationBuilder builder, string name, string registryUrl, string username, string password)
     {
         if (string.IsNullOrWhiteSpace(registryUrl))

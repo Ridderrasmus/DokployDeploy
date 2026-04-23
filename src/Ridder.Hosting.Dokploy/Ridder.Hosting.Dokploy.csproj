@@ -5,6 +5,21 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>ridderrasmus</Authors>
+    <Company>ridderrasmus</Company>
+    <Description>Dokploy publishing integration for .NET Aspire AppHosts, with environment-first registry configuration and publish-to-Dokploy helpers.</Description>
+    <PackageTags>aspire;dokploy;hosting;deployment;containers</PackageTags>
+    <PackageProjectUrl>https://github.com/Ridderrasmus/DokployDeploy</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ridderrasmus/DokployDeploy</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    <NoWarn>$(NoWarn);ASPIREATS001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,9 +27,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting" Version="13.3.0-preview.1.26177.4" />
-    <PackageReference Include="Aspire.Hosting.Docker" Version="13.3.0-preview.1.26177.4" />
+    <PackageReference Include="Aspire.Hosting" Version="13.2.1" />
+  </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Link="README.md" />
   </ItemGroup>
 
 </Project>

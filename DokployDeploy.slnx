@@ -1,9 +1,13 @@
 <Solution>
-  <Folder Name="/samples/">
-    <Project Path="samples/DokployDeploy.ApiService/DokployDeploy.ApiService.csproj" />
-    <Project Path="samples/DokployDeploy.AppHost/DokployDeploy.AppHost.csproj" />
-    <Project Path="samples/DokployDeploy.ServiceDefaults/DokployDeploy.ServiceDefaults.csproj" />
-    <Project Path="samples/DokployDeploy.Web/DokployDeploy.Web.csproj" />
+  <Folder Name="/samples/CSharp/">
+    <Project Path="samples/CSharp/DokployDeploy.ApiService/DokployDeploy.ApiService.csproj" />
+    <Project Path="samples/CSharp/DokployDeploy.AppHost/DokployDeploy.AppHost.csproj" />
+    <Project Path="samples/CSharp/DokployDeploy.ServiceDefaults/DokployDeploy.ServiceDefaults.csproj" />
+    <Project Path="samples/CSharp/DokployDeploy.Web/DokployDeploy.Web.csproj" />
+  </Folder>
+  <Folder Name="/samples/TypeScript/">
+    <Project Path="samples/TypeScript/DokployDeploy.ApiService/DokployDeploy.ApiService.csproj" />
+    <Project Path="samples/TypeScript/DokployDeploy.ServiceDefaults/DokployDeploy.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Ridder.Hosting.Dokploy/Ridder.Hosting.Dokploy.csproj" />
